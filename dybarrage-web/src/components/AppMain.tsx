@@ -7,6 +7,16 @@ import BasicStat from './BasicStat';
 import CrawlRecord from './CrawlRecord';
 const { Content, Sider } = Layout;
 
+const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
+  return <Route exact path={path} children={(props) => 
+    <div style={{
+      display: props.location.pathname === path ? 'block' : 'none'
+    }}>
+      {component}
+    </div>
+  } />;
+};
+
 const AppMain: React.SFC = () => {
   return (
     <Layout>
@@ -19,9 +29,9 @@ const AppMain: React.SFC = () => {
         minHeight: `${window.innerHeight - 64}px`, 
         background: '#fff' 
       }}>
-        <Route exact path="/" component={BasicStat} />
-        <Route exact path="/basic" component={BasicStat} />
-        <Route exact path="/crawlrec" component={CrawlRecord} />
+        { noUnmountedWhenRouteChangesRoute('/', <BasicStat />) }
+        { noUnmountedWhenRouteChangesRoute('/basic', <BasicStat />) }
+        { noUnmountedWhenRouteChangesRoute('/crawlrec', <CrawlRecord />) }
       </Content>
     </Layout>
   );

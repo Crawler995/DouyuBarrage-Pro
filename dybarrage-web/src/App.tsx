@@ -7,6 +7,7 @@ import { Layout, Icon, Result, Input } from 'antd';
 import AppMain from "./components/AppMain";
 import color from './uiconfig/color';
 import getRoomId from './util/getRoomId';
+import getWebSocketClient from './network/websocket';
 
 const { Header, Content } = Layout;
 
@@ -18,14 +19,21 @@ class App extends React.Component {
     this.roomId = getRoomId();
   }
 
+  componentDidMount() {
+    if(this.roomId !== '') {
+      getWebSocketClient();
+    }
+  }
+
   render() {
     if(this.roomId === '') {
       return (
         <div style={{
+          boxSizing: 'border-box',
           position: 'absolute',
           width: '100%',
           height: '100%',
-          lineHeight: '50%'
+          paddingTop: '10vh'
         }}>
           <Result
             icon={<Icon type="plus-circle" theme="twoTone" twoToneColor={color.primary} />}

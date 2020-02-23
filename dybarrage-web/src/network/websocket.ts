@@ -74,6 +74,10 @@ class WebSocketClient {
   public addNeedWaitServerStartFn = (fn: () => void) => {
     this.needWaitServerStartFns.push(fn);
   }
+
+  public emitEvent = (eventId: string, msg: string) => {
+    this.ws.emit(eventId, msg);
+  }
 }
 
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Statistic, Row, Col, Card, Tag, PageHeader, Typography, Divider, Spin, Modal, Input } from "antd";
+import { Statistic, Row, Col, Card, Tag, PageHeader, Typography, Divider, Spin, Modal, Input, Button, message } from "antd";
 import { getRoomDyInfo } from '../network/http';
 import getWebSocketClient from '../network/websocket';
 
@@ -22,7 +22,9 @@ interface IRoomDyInfo {
 interface IState {
   statData: Array<IStatistic>,
   roomDyInfo: IRoomDyInfo,
-  noThisRoom: boolean
+  noThisRoom: boolean,
+  isStartCrawling: boolean,
+  isWSConnected: boolean
 }
 
 export default class BasicStat extends Component<{}, IState> {
@@ -38,12 +40,14 @@ export default class BasicStat extends Component<{}, IState> {
         cateName: '',
         isOnline: false
       },
-      noThisRoom: false
+      noThisRoom: false,
+      isStartCrawling: false,
+      isWSConnected: false
     }
   }
 
   updateStatistic = (data: any) => {
-    this.setState({ statData: JSON.parse(data) });
+    this.setState({ statData: JSON.parse(data), isWSConnected: true });
   }
 
   getRoomDyInfo = () => {
@@ -77,6 +81,9 @@ export default class BasicStat extends Component<{}, IState> {
     // subscribe the event
     // when server sends data to client, the callback fn will be invoked
     getWebSocketClient().addSubscriber('CRAWL_BASIC_STAT', this.updateStatistic.bind(this));
+    getWebSocketClient().addSubscriber('serverclose', () => {
+      this.setState({ isStartCrawling: false, isWSConnected: false });
+    });
     getWebSocketClient().addNeedWaitServerStartFn(this.getRoomDyInfo.bind(this));
 
     this.getRoomDyInfo();
@@ -112,16 +119,37 @@ export default class BasicStat extends Component<{}, IState> {
           [
             <Tag color="orange" key={0}>{isOnline ? '正在直播' : '未开播'}</Tag>,
             <Tag color="orange" key={1}>{cateName}</Tag>
-          ]
-        }
-        extra={
-          isOnline ?
+          ].concat(isOnline ?
           [
-            <Tag color="red" key={0}>{`热度：${hot}`}</Tag>,
-            <Tag color="orange" key={1}>{`开播时间：${startTime}`}</Tag>
+            <Tag color="red" key={2}>{`热度：${hot}`}</Tag>,
+            <Tag color="orange" key={3}>{`开播时间：${startTime}`}</Tag>
           ] :
           [
-            <Tag color="orange" key={1}>{`上次开播时间：${startTime}`}</Tag>
+            <Tag color="orange" key={2}>{`上次开播时间：${startTime}`}</Tag>
+          ])
+        }
+        extra={
+          [
+            <Button
+              key={0}
+              type="primary" 
+              disabled={!this.state.isWSConnected || this.state.isStartCrawling}
+              onClick={() => {
+                getWebSocketClient().emitEvent('startcrawl', '');
+                message.success('开始抓取！');
+                this.setState({ isStartCrawling: true });
+              }}
+            >开始抓取</Button>,
+            <Button
+              key={1}
+              type="primary" 
+              disabled={!this.state.isStartCrawling}
+              onClick={() => {
+                getWebSocketClient().emitEvent('stopcrawl', '');
+                message.success('已停止抓取！')
+                this.setState({ isStartCrawling: false });
+              }}
+            >停止抓取</Button>
           ]
         }
       /> :

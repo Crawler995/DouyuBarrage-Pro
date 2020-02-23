@@ -1,10 +1,15 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
 import * as Socket from 'socket.io';
-
+import * as process from 'process';
 import getRoomDyInfo from './router/getRoomDyInfo';
-
 import RoomManager from './websocket/RoomManager';
+import getCrawlRecord from './router/getCrawlRecord';
+
+process.on('SIGINT', async () => {
+  await RoomManager.sigintExit();
+  process.exit();
+})
 
 const app = new Koa();
 
@@ -12,6 +17,7 @@ const app = new Koa();
 const router = new Router();
 
 router.get('/api/room/:roomId/dyinfo', getRoomDyInfo);
+router.get('/api/room/:roomId/crawlrec', getCrawlRecord);
 
 app
 .use(router.routes())
@@ -33,13 +39,13 @@ io.on('connection', (socket) => {
   });
 
   // start crawl process
-  socket.on('startcrawl', roomId => {
-
+  socket.on('startcrawl', () => {
+    RoomManager.startRoomCrawlProcess(socket);
   });
 
   // stop crawl process
   socket.on('stopcrawl', () => {
-
+    RoomManager.stopRoomCrawlProcess(socket);
   });
 
   // the client is disconnected
