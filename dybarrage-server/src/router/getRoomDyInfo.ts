@@ -37,5 +37,10 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
     ctx.body = roomDyInfo;
   } catch (error) {
     console.log(error);
+    ctx.status = 500;
+    ctx.body = {
+      error: 500,
+      data: '网络无连接'
+    }
   }
 };

@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import msgTypeDataSourceMap from "./msgTypes";
 import CrawlRecord from "../model/CrawlRecord";
 import * as moment from "moment";
+import DmCrawler from "./crawler/DmCrawler";
 
 interface RoomUtil {
   roomId: string,
@@ -53,15 +54,14 @@ class RoomManager {
 
     util.startCrawlTime = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
-    // todo
-
+    DmCrawler.addCrawler(util.roomId);
   }
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
     const util = this.roomUtilMap.get(socket) as RoomUtil;
     console.log(`stop room ${util.roomId} crawl process`);
     
-    // todo
+    DmCrawler.removeCrawler(util.roomId);
 
     await CrawlRecord.upsert({
       start_time: util.startCrawlTime,
@@ -79,12 +79,6 @@ class RoomManager {
     for(const [socket, util] of this.roomUtilMap) {
       if(util.startCrawlTime !== '') {
         await this.stopRoomCrawlProcess(socket);
-
-        // todo
-        // stop crawl process
-
-
-        // emit 'serverclose' event
       }
       socket.emit('serverclose', '');
     }

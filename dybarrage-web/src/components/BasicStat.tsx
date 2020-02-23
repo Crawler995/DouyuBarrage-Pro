@@ -71,6 +71,8 @@ export default class BasicStat extends Component<{}, IState> {
     .catch(err => {
       if(err.response.status === 404) {
         this.setState({ noThisRoom: true });
+      } else if(err.response.status === 500) {
+        message.error('无互联网连接，无法获取房间信息！');
       }
     });
 

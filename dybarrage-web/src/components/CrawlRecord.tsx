@@ -142,9 +142,13 @@ export default class CrawlRecord extends Component<{}, IState> {
         <Typography.Title level={4}>抓取记录</Typography.Title>
         <Button
           type="primary" 
-          style={{ marginBottom: '10px' }}
+          style={{ marginBottom: '10px', marginRight: '10px' }}
           disabled={this.state.selectedRowKeys.length === 0}
-        >下载弹幕</Button>
+        >下载选中弹幕</Button>
+        <Button
+          type="primary" 
+          style={{ marginBottom: '10px' }}
+        >下载全部弹幕</Button>
         { this.renderTable() }
       </div>
     )

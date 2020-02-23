@@ -92,7 +92,7 @@ const getWebSocketClient = (): WebSocketClient => {
       // the websocket connection can be recovered automatically
       // but the HTTP can't re-requested
       // so user should refresh the page
-      () => message.error('连接服务器失败！请启动服务器后刷新页面。')
+      () => message.error('连接服务器失败！请启动服务器。')
     );
   }
   return websocketClient;
