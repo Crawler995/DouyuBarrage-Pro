@@ -1,0 +1,27 @@
+{
+  "name": "dybarrage-server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "tsc && node dist/server.js",
+    "watch-server": "cross-env nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/server.ts"
+  },
+  "author": "Crawler995",
+  "license": "MIT",
+  "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/koa": "^2.11.1",
+    "@types/koa-router": "^7.4.0",
+    "@types/socket.io": "^2.1.4",
+    "axios": "^0.19.2",
+    "koa": "^2.11.0",
+    "koa-router": "^8.0.8",
+    "socket.io": "^2.3.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
