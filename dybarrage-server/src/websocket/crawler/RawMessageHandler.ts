@@ -54,7 +54,9 @@ export default class RawMessageHandler {
 
     decodeMsgs.forEach(decodeMsg => {
       const obj = RawMessageHandler.parseDecodeMsg(decodeMsg);
-      res.push(obj);
+      if(obj.type === 'chatmsg') {
+        res.push(obj);
+      }
     });
 
     return res;

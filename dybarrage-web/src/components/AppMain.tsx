@@ -1,10 +1,11 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 
 import { Layout } from 'antd';
 import AppMenu from './AppMenu';
 import BasicStat from './BasicStat';
 import CrawlRecord from './CrawlRecord';
+import getRoomId from '../util/getRoomId';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -29,9 +30,9 @@ const AppMain: React.SFC = () => {
         minHeight: `${window.innerHeight - 64}px`, 
         background: '#fff' 
       }}>
-        { noUnmountedWhenRouteChangesRoute('/', <BasicStat />) }
         { noUnmountedWhenRouteChangesRoute('/basic', <BasicStat />) }
         { noUnmountedWhenRouteChangesRoute('/crawlrec', <CrawlRecord />) }
+        <Redirect from="/" to={`/basic?roomid=${getRoomId()}`} />
       </Content>
     </Layout>
   );

@@ -2,12 +2,13 @@ import * as Koa from 'koa';
 import * as Router from 'koa-router';
 import * as Socket from 'socket.io';
 import * as process from 'process';
-import getRoomDyInfo from './router/getRoomDyInfo';
 import RoomManager from './websocket/RoomManager';
-import getCrawlRecord from './router/getCrawlRecord';
+
+import * as HttpDataGet from './http/dataget';
+import singleReceiveMsgTypes from './websocket/msgtype/singleReceiveMsgTypes';
 
 process.on('SIGINT', async () => {
-  await RoomManager.sigintExit();
+  await RoomManager.forceStopAll();
   process.exit();
 })
 
@@ -15,10 +16,8 @@ const app = new Koa();
 
 // http server
 const router = new Router();
-
-router.get('/api/room/:roomId/dyinfo', getRoomDyInfo);
-router.get('/api/room/:roomId/crawlrec', getCrawlRecord);
-
+router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
+router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
 app
 .use(router.routes())
 .use(router.allowedMethods());
@@ -27,24 +26,22 @@ app
 const io = Socket(app.listen(3001, () => {
   console.log('server listen on port 3001');
 }));
-
 io.on('connection', (socket) => {
   console.log('new connection');
 
-  // receive 'addroom' from the client
+  // receive 'add_room' from the client
   // means the client is prepared
-  // and shows which room the socket belongs to
-  socket.on('addroom', roomId => {
-    RoomManager.addRoom(roomId, socket);
+  socket.on('add_room', async (roomId) => {
+    await RoomManager.addRoom(roomId, socket);
   });
 
   // start crawl process
-  socket.on('startcrawl', () => {
+  socket.on('start_crawl', () => {
     RoomManager.startRoomCrawlProcess(socket);
   });
 
   // stop crawl process
-  socket.on('stopcrawl', () => {
+  socket.on('stop_crawl', () => {
     RoomManager.stopRoomCrawlProcess(socket);
   });
 

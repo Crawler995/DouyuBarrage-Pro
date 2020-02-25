@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Statistic, Row, Col, Card, Tag, PageHeader, Typography, Divider, Spin, Modal, Input, Button, message } from "antd";
 import { getRoomDyInfo } from '../network/http';
-import getWebSocketClient from '../network/websocket';
+import getWebSocketClient from '../network/websocket/WebSocketClient';
 
 
 interface IStatistic {
@@ -24,7 +24,7 @@ interface IState {
   roomDyInfo: IRoomDyInfo,
   noThisRoom: boolean,
   isStartCrawling: boolean,
-  isWSConnected: boolean
+  isAddedRoomSuccess: boolean
 }
 
 export default class BasicStat extends Component<{}, IState> {
@@ -42,12 +42,8 @@ export default class BasicStat extends Component<{}, IState> {
       },
       noThisRoom: false,
       isStartCrawling: false,
-      isWSConnected: false
+      isAddedRoomSuccess: false
     }
-  }
-
-  updateStatistic = (data: any) => {
-    this.setState({ statData: JSON.parse(data), isWSConnected: true });
   }
 
   getRoomDyInfo = () => {
@@ -76,16 +72,31 @@ export default class BasicStat extends Component<{}, IState> {
       }
     });
 
-    console.log('get dy')
+    console.log('get room dy info');
+  }
+
+  subscribeEvents = () => {
+    getWebSocketClient().addSubscriber('add_room_success', () => {
+      this.setState({ isAddedRoomSuccess: true });
+    })
+    getWebSocketClient().addSubscriber('crawl_basic_stat', (data: any) => {
+      this.setState({ statData: JSON.parse(data) });
+    });
+    getWebSocketClient().addSubscriber('server_stop_unexpectedly', () => {
+      this.setState({ isStartCrawling: false, isAddedRoomSuccess: false });
+    });
+    getWebSocketClient().addSubscriber('start_crawl_success', () => {
+      message.success('开始抓取！');
+      this.setState({ isStartCrawling: true });
+    });
+    getWebSocketClient().addSubscriber('stop_crawl_success', () => {
+      message.success('已停止抓取！')
+      this.setState({ isStartCrawling: false });
+    });
   }
 
   componentDidMount() {
-    // subscribe the event
-    // when server sends data to client, the callback fn will be invoked
-    getWebSocketClient().addSubscriber('CRAWL_BASIC_STAT', this.updateStatistic.bind(this));
-    getWebSocketClient().addSubscriber('serverclose', () => {
-      this.setState({ isStartCrawling: false, isWSConnected: false });
-    });
+    this.subscribeEvents();
     getWebSocketClient().addNeedWaitServerStartFn(this.getRoomDyInfo.bind(this));
 
     this.getRoomDyInfo();
@@ -135,22 +146,14 @@ export default class BasicStat extends Component<{}, IState> {
             <Button
               key={0}
               type="primary" 
-              disabled={!this.state.isWSConnected || this.state.isStartCrawling}
-              onClick={() => {
-                getWebSocketClient().emitEvent('startcrawl', '');
-                message.success('开始抓取！');
-                this.setState({ isStartCrawling: true });
-              }}
+              disabled={!this.state.isAddedRoomSuccess || this.state.isStartCrawling}
+              onClick={() => getWebSocketClient().emitEvent('start_crawl', '') }
             >开始抓取</Button>,
             <Button
               key={1}
               type="primary" 
               disabled={!this.state.isStartCrawling}
-              onClick={() => {
-                getWebSocketClient().emitEvent('stopcrawl', '');
-                message.success('已停止抓取！')
-                this.setState({ isStartCrawling: false });
-              }}
+              onClick={() => getWebSocketClient().emitEvent('stop_crawl', '') }
             >停止抓取</Button>
           ]
         }

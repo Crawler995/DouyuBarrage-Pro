@@ -7,7 +7,7 @@ import { Layout, Icon, Result, Input } from 'antd';
 import AppMain from "./components/AppMain";
 import color from './uiconfig/color';
 import getRoomId from './util/getRoomId';
-import getWebSocketClient from './network/websocket';
+import getWebSocketClient from './network/websocket/WebSocketClient';
 
 const { Header, Content } = Layout;
 
@@ -21,7 +21,7 @@ class App extends React.Component {
 
   componentDidMount() {
     if(this.roomId !== '') {
-      getWebSocketClient();
+      getWebSocketClient().start();
     }
   }
 

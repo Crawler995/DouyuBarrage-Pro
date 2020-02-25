@@ -1,6 +1,6 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
-import CrawlRecord from '../model/CrawlRecord';
+import CrawlRecord from '../../model/CrawlRecord';
 import { Op } from 'sequelize';
 
 export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>) => {
@@ -28,6 +28,9 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
   try {
     const res = await CrawlRecord.findAll({ 
       where, 
+      order: [
+        ['start_time', 'desc']
+      ],
       limit: limit ? parseInt(limit) : undefined, 
       offset: offset ? parseInt(offset) : undefined
     });

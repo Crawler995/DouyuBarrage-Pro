@@ -1,5 +1,5 @@
 import { Sequelize, DATE, STRING, NOW, INTEGER, Model, NUMBER } from "sequelize";
-import db from '../router/db';
+import db from './db';
 import * as moment from "moment";
 
 // table crawl_record

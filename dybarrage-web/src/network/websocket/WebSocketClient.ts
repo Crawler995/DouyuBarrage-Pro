@@ -1,6 +1,9 @@
 import io from "socket.io-client";
-import getRoomId from '../util/getRoomId';
+import getRoomId from '../../util/getRoomId';
 import { message } from "antd";
+import singleReceiveMsgTypes from "./singleReceiveMsgTypes";
+import singleSendMsgTypes from "./singleSendMsgTypes";
+import periodlyReceiveMsgTypes from "./periodlyReceiveMsgTypes";
 
 
 class WebSocketClient {
@@ -31,11 +34,10 @@ class WebSocketClient {
       // and HTTP requests should be requested
       if(getRoomId() !== '') {      
         if(this.isConnectedFailedBefore) {
-          this.needWaitServerStartFns.forEach(fn => {
-            fn();
-          });
+          this.needWaitServerStartFns.forEach(fn => fn());
+          this.start();
         }
-        this.start();
+
         connectSuccessFn();
       }
     });
@@ -55,7 +57,7 @@ class WebSocketClient {
 
   // tell the server: you can send data to me
   public start = () => {
-    this.ws.emit('addroom', this.roomId);
+    this.emitEvent('add_room', getRoomId());
     this.isConnectedFailedBefore = false;
   }
 
@@ -63,11 +65,14 @@ class WebSocketClient {
     this.ws.close();
   }
 
-  public addSubscriber = (eventId: string, notifyFn: (data: any) => void) => {
+  public addSubscriber = (
+    eventId: singleReceiveMsgTypes | periodlyReceiveMsgTypes, 
+    notifyFn: (data: any) => void
+  ) => {
     this.ws.on(eventId, (data: any) => notifyFn(data));
   }
 
-  public removeSubscriber = (eventId: string) => {
+  public removeSubscriber = (eventId: singleReceiveMsgTypes | periodlyReceiveMsgTypes) => {
     this.ws.off(eventId);
   }
 
@@ -75,7 +80,7 @@ class WebSocketClient {
     this.needWaitServerStartFns.push(fn);
   }
 
-  public emitEvent = (eventId: string, msg: string) => {
+  public emitEvent = (eventId: singleSendMsgTypes, msg: string) => {
     this.ws.emit(eventId, msg);
   }
 }
@@ -89,10 +94,7 @@ const getWebSocketClient = (): WebSocketClient => {
     websocketClient = new WebSocketClient(
       getRoomId(),
       () => message.success('连接服务器成功！'),
-      // the websocket connection can be recovered automatically
-      // but the HTTP can't re-requested
-      // so user should refresh the page
-      () => message.error('连接服务器失败！请启动服务器。')
+      () => message.error('连接服务器失败！请检查服务器。')
     );
   }
   return websocketClient;

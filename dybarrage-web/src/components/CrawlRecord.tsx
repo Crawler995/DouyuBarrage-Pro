@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card, DatePicker, Form, Table, Typography, Button } from 'antd';
 import { getCrawlRecord } from '../network/http';
 import { TableRowSelection, PaginationConfig } from 'antd/lib/table';
-import getWebSocketClient from '../network/websocket';
+import getWebSocketClient from '../network/websocket/WebSocketClient';
 
 interface IRow {
   key: string,

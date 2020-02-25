@@ -9,7 +9,7 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
     min: 0,
     idle: 10000
   },
-  logging: true,
+  logging: false,
   define: {
     charset: 'utf8'
   },
