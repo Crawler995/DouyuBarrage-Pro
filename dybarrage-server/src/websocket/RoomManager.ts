@@ -6,7 +6,7 @@ import DmCrawler from "./crawler/DmCrawler";
 import SingleSendMsgTypesEnum from "./msgtype/singleSendMsgTypes";
 import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
 
-interface RoomUtil {
+export interface RoomUtil {
   roomId: string,
   intervalFlag: any,
   startCrawlTime: string
@@ -21,16 +21,16 @@ class RoomManager {
   }
 
   public addRoom = async (roomId: string, socket: Socket) => {
-    // for client init data
-    for(const [msgType, dataGetFn] of periodlySendMsgTypeDataGetMap) {
-      socket.emit(msgType, await dataGetFn(roomId));
-    }
-
     this.roomUtilMap.set(socket, {
       roomId,
       intervalFlag: 0,
       startCrawlTime: ''
     });
+    
+    // for client init data
+    for(const [msgType, dataGetFn] of periodlySendMsgTypeDataGetMap) {
+      socket.emit(msgType, await dataGetFn(roomId));
+    }
 
     // emit add_room_success event to client
     this.singleEmitClient(socket, 'add_room_success');
@@ -88,13 +88,12 @@ class RoomManager {
     console.log(`stop room ${util.roomId} crawl process`);
   }
 
-  public getCrawlStartTimeByRoomId = (roomId: string) => {
+  public getUtilByRoomId = (roomId: string) => {
     for(const [socket, util] of this.roomUtilMap) {
       if(roomId === util.roomId) {
-        return util.startCrawlTime;
+        return util;
       }
     }
-    return '';
   }
 
   // stop all crawl process

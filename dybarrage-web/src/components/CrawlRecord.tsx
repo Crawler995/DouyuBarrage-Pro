@@ -89,7 +89,7 @@ export default class CrawlRecord extends Component<{}, IState> {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">确认</Button>
+            <Button type="primary" htmlType="submit">刷新</Button>
           </Form.Item>
         </Form>
       </Card>
