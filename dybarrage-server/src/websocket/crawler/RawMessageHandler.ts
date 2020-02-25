@@ -40,7 +40,7 @@ export default class RawMessageHandler {
     attrs.pop();
 
     attrs.forEach(attr => {
-      attr = attr.replace('@S', '/').replace('@A', '@')
+      attr = attr.replace(/@S/g, '/').replace(/@A/g, '@')
       const couple = attr.split('@=');
       res[couple[0]] = couple[1];
     });

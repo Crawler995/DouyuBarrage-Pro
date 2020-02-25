@@ -21,6 +21,7 @@ class RoomManager {
   }
 
   public addRoom = async (roomId: string, socket: Socket) => {
+    // for client init data
     for(const [msgType, dataGetFn] of periodlySendMsgTypeDataGetMap) {
       socket.emit(msgType, await dataGetFn(roomId));
     }
@@ -31,7 +32,7 @@ class RoomManager {
       startCrawlTime: ''
     });
 
-    // emit addRoomSuccess event to client
+    // emit add_room_success event to client
     this.singleEmitClient(socket, 'add_room_success');
 
     console.log('add room ' + roomId);
@@ -70,9 +71,10 @@ class RoomManager {
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
     const util = this.roomUtilMap.get(socket) as RoomUtil;    
-
+    // stop send data periodly
     clearInterval(util.intervalFlag);
     DmCrawler.removeCrawler(util.roomId);
+    // insert crawl record to database
     await CrawlRecord.upsert({
       start_time: util.startCrawlTime,
       stop_time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
@@ -102,8 +104,6 @@ class RoomManager {
       if(util.startCrawlTime !== '') {
         await this.stopRoomCrawlProcess(socket);
       }
-
-      this.singleEmitClient(socket, 'stop_crawl_success');
     }
   }
 }

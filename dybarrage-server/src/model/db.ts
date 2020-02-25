@@ -10,8 +10,11 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
     idle: 10000
   },
   logging: false,
+  dialectOptions: {
+    charset: 'utf8mb4'
+  },
   define: {
-    charset: 'utf8'
+    charset: 'utf8mb4'
   },
   timezone: dbconfig.timezone
 });

@@ -1,3 +1,5 @@
+// not periodly
+// only send when specific condition occurs
 type singleSendMsgTypes =
   'add_room_success' |
   'add_room_failed' |
