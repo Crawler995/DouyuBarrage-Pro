@@ -20,7 +20,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if(this.roomId !== '') {
+    if(this.roomId !== '' && window.location.pathname !== '/') {
       getWebSocketClient().start();
     }
   }

@@ -9,7 +9,8 @@ import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
 export interface RoomUtil {
   roomId: string,
   intervalFlag: any,
-  startCrawlTime: string
+  startCrawlTime: string,
+  crawlDmNum: number
 }
 
 class RoomManager {
@@ -24,9 +25,10 @@ class RoomManager {
     this.roomUtilMap.set(socket, {
       roomId,
       intervalFlag: 0,
-      startCrawlTime: ''
+      startCrawlTime: '',
+      crawlDmNum: 0
     });
-    
+
     // for client init data
     for(const [msgType, dataGetFn] of periodlySendMsgTypeDataGetMap) {
       socket.emit(msgType, await dataGetFn(roomId));
@@ -79,7 +81,7 @@ class RoomManager {
       start_time: util.startCrawlTime,
       stop_time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
       room_id: util.roomId,
-      dm_num: Math.ceil(Math.random() * 2000)
+      dm_num: util.crawlDmNum
     });
     util.startCrawlTime = '';
 
@@ -103,6 +105,7 @@ class RoomManager {
       if(util.startCrawlTime !== '') {
         await this.stopRoomCrawlProcess(socket);
       }
+      this.singleEmitClient(socket, 'server_stop_unexpectedly');
     }
   }
 }

@@ -26,7 +26,7 @@ const menu: IMenu = {
       items: [
         { text: '概览', path: 'basic' },
         { text: '抓取记录及弹幕下载', path: 'crawlrec' },
-        { text: '高频弹幕', path: 'mostdm' },
+        { text: '关键词统计', path: 'keywordstat' },
         { text: '铁粉统计', path: 'fansstat' }
       ]
     },

@@ -9,8 +9,9 @@ import singleReceiveMsgTypes from './websocket/msgtype/singleReceiveMsgTypes';
 
 process.on('SIGINT', async () => {
   await RoomManager.forceStopAll();
+  console.log('exit');
   process.exit();
-})
+});
 
 const app = new Koa();
 

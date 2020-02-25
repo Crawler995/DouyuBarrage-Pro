@@ -11,7 +11,8 @@ export default async (roomId: string) => {
     }
   })).count;
 
-  const {startCrawlTime} = RoomManager.getUtilByRoomId(roomId) as RoomUtil;
+  const util = RoomManager.getUtilByRoomId(roomId) as RoomUtil;
+  const startCrawlTime = util.startCrawlTime;
   let thisCrawlBarrageCount;
   if(startCrawlTime === '') {
     thisCrawlBarrageCount = 0;
@@ -25,6 +26,7 @@ export default async (roomId: string) => {
       }
     })).count;
   }
+  util.crawlDmNum = thisCrawlBarrageCount;
 
   // correct value: '00:01:35'
   // crawlFakeTotalTime: 135
@@ -57,7 +59,14 @@ interface Time {
 }
 
 // fakeTime: 135 means '00:01:35'
-const convertFakeTimeToTime = (fakeTime: number): Time => {
+const convertFakeTimeToTime = (fakeTime: number | null): Time => {
+  if(fakeTime === null) {
+    return {
+      hours: 0,
+      minutes: 0,
+      seconds: 0
+    };
+  }
   const crawlFakeTotalTimeStr = fakeTime.toString();
   let crawlTotalTimeStr = '';
   // '135' -> '000135'
