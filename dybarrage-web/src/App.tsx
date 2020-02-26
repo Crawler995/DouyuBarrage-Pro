@@ -45,7 +45,7 @@ class App extends React.Component {
                 placeholder="房间号"
                 enterButton
                 style={{ width: '300px' }}
-                onSearch={value => window.location.href = `http://localhost:3000?roomid=${value}`}
+                onSearch={value => window.location.href = `http://localhost:3000/basic?roomid=${value}`}
               />
             }
           />

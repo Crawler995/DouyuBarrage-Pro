@@ -5,25 +5,27 @@ import * as moment from "moment";
 import DmCrawler from "./crawler/DmCrawler";
 import SingleSendMsgTypesEnum from "./msgtype/singleSendMsgTypes";
 import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
-import { getCrawlBasicStat } from './dataget';
+import { getCrawlBasicStat, getKeywordStat } from './dataget';
 import log4js from "../logger";
 
 export interface RoomUtil {
   roomId: string,
   intervalFlag: any,
   startCrawlTime: string,
-  crawlDmNum: number
+  crawlDmNum: number,
+  dmKeywords: Array<string>
 }
 
 class RoomManager {
   private roomUtilMap: Map<Socket, RoomUtil> = new Map<Socket, RoomUtil>();
-  private periodlySendMsgTypeFnMap: Map<periodlySendMsgType, (roomId: string) => Promise<string>>;
+  private periodlySendMsgTypeFnMap: Map<periodlySendMsgType, (util: RoomUtil) => Promise<string>>;
   private DATA_SEND_INTERVAL: number = 1000;
   private logger = log4js.getLogger('RoomManager');
 
   constructor() {
-    this.periodlySendMsgTypeFnMap = new Map<periodlySendMsgType, (roomId: string) => Promise<string>>([
-      ['crawl_basic_stat', getCrawlBasicStat]
+    this.periodlySendMsgTypeFnMap = new Map<periodlySendMsgType, (util: RoomUtil) => Promise<string>>([
+      ['crawl_basic_stat', getCrawlBasicStat],
+      ['keyword_stat', getKeywordStat]
     ]);
   }
 
@@ -60,17 +62,21 @@ class RoomManager {
       return;
     }
     
-    this.roomUtilMap.set(socket, {
+    const util: RoomUtil = {
       roomId,
       intervalFlag: 0,
       startCrawlTime: '',
-      crawlDmNum: 0
-    });
+      crawlDmNum: 0,
+      dmKeywords: []
+    };
+    this.roomUtilMap.set(socket, util);
 
-    // for client init data
-    for(const [msgType, dataGetFn] of this.periodlySendMsgTypeFnMap) {
-      socket.emit(msgType, await dataGetFn(roomId));
-    }
+    // periodly send data to new client
+    util.intervalFlag = setInterval(async () => {
+      for(const [msgType, dataGetFn] of this.periodlySendMsgTypeFnMap) {
+        socket.emit(msgType, await dataGetFn(util));
+      }
+    }, this.DATA_SEND_INTERVAL);
 
     // emit add_room_success event to client
     this.singleEmitClient(socket, 'add_room_success');
@@ -92,6 +98,8 @@ class RoomManager {
     if(util.startCrawlTime !== '') {
       await this.stopRoomCrawlProcess(socket);
     }
+    // stop send data periodly
+    clearInterval(util.intervalFlag);
     this.roomUtilMap.delete(socket);
 
     this.logger.info('remove room ' + util.roomId);
@@ -105,13 +113,6 @@ class RoomManager {
       this.singleEmitClient(socket, 'start_crawl_failed', '还未成功加入服务器！');
       return;
     }
-
-    // periodly send data to new client
-    util.intervalFlag = setInterval(async () => {
-      for(const [msgType, dataGetFn] of this.periodlySendMsgTypeFnMap) {
-        socket.emit(msgType, await dataGetFn(util.roomId));
-      }
-    }, this.DATA_SEND_INTERVAL);
 
     DmCrawler.addCrawler(util.roomId);
     util.startCrawlTime = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
@@ -128,8 +129,7 @@ class RoomManager {
       this.singleEmitClient(socket, 'stop_crawl_failed', '还未开始抓取');
       return;
     }
-    // stop send data periodly
-    clearInterval(util.intervalFlag);
+    
     DmCrawler.removeCrawler(util.roomId);
     // insert crawl record to database
     await CrawlRecord.upsert({
@@ -141,6 +141,32 @@ class RoomManager {
     util.startCrawlTime = '';
 
     this.singleEmitClient(socket, 'stop_crawl_success');
+  }
+
+  public addKeyword = (socket: Socket, keyword: string) => {
+    const util = this.roomUtilMap.get(socket);
+    if(util === undefined) {
+      this.logger.error('add keyword error');
+      this.singleEmitClient(socket, 'add_keyword_failed', '还未成功加入服务器！');
+      return;
+    }
+
+    this.logger.info('add keyword ' + keyword);
+    util.dmKeywords.push(keyword);
+    this.singleEmitClient(socket, 'add_keyword_success');
+  }
+
+  public deleteKeyword = (socket: Socket, keyword: string) => {
+    const util = this.roomUtilMap.get(socket);
+    if(util === undefined) {
+      this.logger.error('delete keyword error');
+      this.singleEmitClient(socket, 'delete_keyword_failed', '还未成功加入服务器！');
+      return;
+    }
+
+    this.logger.info('delete keyword ' + keyword);
+    util.dmKeywords = util.dmKeywords.filter(item => item !== keyword);
+    this.singleEmitClient(socket, 'delete_keyword_success');
   }
 
   public getUtilByRoomId = (roomId: string) => {

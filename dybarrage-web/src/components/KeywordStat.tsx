@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Card, Input, Typography, Table, Button } from 'antd';
+import { Card, Input, Typography, Table, Button, message } from 'antd';
 import { PaginationConfig } from 'antd/lib/table';
+import getWebSocketClient from '../network/websocket/WebSocketClient';
 
 interface IRow {
   key: string
@@ -10,7 +11,8 @@ interface IRow {
 }
 
 interface IState {
-  tableData: Array<IRow>
+  tableData: Array<IRow>,
+  isAddedRoomSuccess: boolean
 }
 
 export default class KeywordStat extends Component<{}, IState> {
@@ -18,30 +20,41 @@ export default class KeywordStat extends Component<{}, IState> {
     super(props);
 
     this.state = {
-      tableData: []
+      tableData: [],
+      isAddedRoomSuccess: false
     }
+  }
+
+  subscribeEvents = () => {
+    const ws = getWebSocketClient();
+    ws.addSubscriber('add_keyword_success', () => message.success('添加关键词成功！'));
+    ws.addSubscriber('add_keyword_failed', (error) => message.error(error));
+    ws.addSubscriber('delete_keyword_success', () => message.success('删除关键词成功！'));
+    ws.addSubscriber('delete_keyword_failed', (error) => message.error(error));
+
+    ws.addSubscriber('keyword_stat', (data: any) => this.setState({ tableData: JSON.parse(data) }));
+
+    ws.addConnectSuccessHook(() => this.setState({ isAddedRoomSuccess: true }));
+    ws.addConnectErrorHook(() => this.setState({ isAddedRoomSuccess: false }));
+  }
+
+  componentDidMount() {
+    this.subscribeEvents();
   }
 
   addKeyword = (keyword: string) => {
     if(this.state.tableData.map(item => item.keyword).includes(keyword)) {
       return;
     }
+    if(keyword.trim() === '') {
+      return;
+    }
 
-    const {tableData} = this.state;
-    tableData.push({
-      key: keyword,
-      keyword,
-      totalMatchNum: 0,
-      thisCrawlMatchNum: 0
-    });
-    this.setState({ tableData });
+    getWebSocketClient().emitEvent('add_keyword', keyword);
   }
 
   deleteKeyword = (keyword: string) => {
-    const {tableData} = this.state;
-    this.setState({
-      tableData: tableData.filter(item => item.keyword !== keyword)
-    });
+    getWebSocketClient().emitEvent('delete_keyword', keyword);
   }
 
   renderInput = () => {
@@ -50,6 +63,7 @@ export default class KeywordStat extends Component<{}, IState> {
         <Input.Search
           placeholder="输入后回车添加关键词"
           enterButton
+          disabled={!this.state.isAddedRoomSuccess}
           style={{ width: '300px' }}
           onSearch={value => this.addKeyword(value)}
         />
@@ -64,11 +78,11 @@ export default class KeywordStat extends Component<{}, IState> {
         dataIndex: 'keyword'
       },
       {
-        title: '总匹配数量',
+        title: '总出现数量',
         dataIndex: 'totalMatchNum'
       },
       {
-        title: '此次匹配数量',
+        title: '此次出现数量',
         dataIndex: 'thisCrawlMatchNum'
       },
       {
@@ -76,6 +90,7 @@ export default class KeywordStat extends Component<{}, IState> {
         dataIndex: 'deleteKeyword',
         render: (text: any, record: any) => 
           <Button
+            disabled={!this.state.isAddedRoomSuccess}
             onClick={() => this.deleteKeyword(record.key)}
           >
             删除

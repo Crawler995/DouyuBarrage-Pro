@@ -4,14 +4,14 @@ import { Op, Sequelize } from "sequelize";
 import moment = require("moment");
 import CrawlRecord from "../../model/CrawlRecord";
 
-export default async (roomId: string) => {
+export default async (util: RoomUtil) => {
+  const roomId = util.roomId;
   const totalBarrageCount = await (await Barrage.findAndCountAll({
     where: {
       room_id: roomId
     }
   })).count;
 
-  const util = RoomManager.getUtilByRoomId(roomId) as RoomUtil;
   const startCrawlTime = util.startCrawlTime;
   let thisCrawlBarrageCount;
   if(startCrawlTime === '') {

@@ -1,7 +1,8 @@
 // periodly send to client
 // real-time data
 type periodlySendMsgType = 
-  'crawl_basic_stat'
+  'crawl_basic_stat' |
+  'keyword_stat'
 ;
 
 

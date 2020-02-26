@@ -49,6 +49,14 @@ io.on('connection', (socket) => {
     RoomManager.stopRoomCrawlProcess(socket);
   });
 
+  // add keyword
+  socket.on('add_keyword', (keyword: string) => {
+    RoomManager.addKeyword(socket, keyword);
+  });
+  socket.on('delete_keyword', (keyword: string) => {
+    RoomManager.deleteKeyword(socket, keyword);
+  });
+
   // the client is disconnected
   // remove all things of the client
   socket.on('disconnect', () => {

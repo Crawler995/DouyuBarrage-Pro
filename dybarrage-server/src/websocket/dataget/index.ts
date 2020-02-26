@@ -1,5 +1,7 @@
 import getCrawlBasicStat from "./getCrawlBasicStat";
+import getKeywordStat from './getKeywordStat';
 
 export {
-  getCrawlBasicStat
+  getCrawlBasicStat,
+  getKeywordStat
 };
