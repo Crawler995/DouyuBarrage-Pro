@@ -23,6 +23,7 @@ interface IState {
   statData: Array<IStatistic>,
   roomDyInfo: IRoomDyInfo,
   noThisRoom: boolean,
+  alreadyAddSameRoom: boolean,
   isStartCrawling: boolean,
   isAddedRoomSuccess: boolean
 }
@@ -41,6 +42,7 @@ export default class BasicStat extends Component<{}, IState> {
         isOnline: false
       },
       noThisRoom: false,
+      alreadyAddSameRoom: false,
       isStartCrawling: false,
       isAddedRoomSuccess: false
     }
@@ -76,28 +78,46 @@ export default class BasicStat extends Component<{}, IState> {
   }
 
   subscribeEvents = () => {
-    getWebSocketClient().addSubscriber('add_room_success', () => {
+    const ws = getWebSocketClient();
+    ws.addSubscriber('add_room_success', () => {
       this.setState({ isAddedRoomSuccess: true });
-    })
-    getWebSocketClient().addSubscriber('crawl_basic_stat', (data: any) => {
+    });
+    ws.addSubscriber('add_room_failed', (data: any) => {
+      message.error(data);
+      this.setState({ alreadyAddSameRoom: true });
+    });
+
+    ws.addSubscriber('crawl_basic_stat', (data: any) => {
       this.setState({ statData: JSON.parse(data) });
     });
-    getWebSocketClient().addSubscriber('server_stop_unexpectedly', () => {
-      this.setState({ isStartCrawling: false, isAddedRoomSuccess: false });
-    });
-    getWebSocketClient().addSubscriber('start_crawl_success', () => {
+
+    ws.addSubscriber('start_crawl_success', () => {
       message.success('开始抓取！');
       this.setState({ isStartCrawling: true });
     });
-    getWebSocketClient().addSubscriber('stop_crawl_success', () => {
+    ws.addSubscriber('start_crawl_failed', (data: any) => {
+      message.error(data);
+    });
+
+    ws.addSubscriber('crawl_failed', (data: any) => {
+      message.error(data);
+      this.setState({ isStartCrawling: false });
+    });
+
+    ws.addSubscriber('stop_crawl_success', () => {
       message.success('已停止抓取！')
       this.setState({ isStartCrawling: false });
     });
+    ws.addSubscriber('stop_crawl_failed', (data: any) => {
+      message.error(data);
+    });
+
+    ws.addConnectSuccessHook(() => this.getRoomDyInfo());
+    ws.addConnectErrorHook(() => this.setState({ isAddedRoomSuccess: false }));
   }
 
   componentDidMount() {
     this.subscribeEvents();
-    getWebSocketClient().addNeedWaitServerStartFn(this.getRoomDyInfo.bind(this));
 
     this.getRoomDyInfo();
   }
@@ -164,15 +184,15 @@ export default class BasicStat extends Component<{}, IState> {
 
   // if this room is not existed in Douyu
   // the modal will appear to force user to re-select room
-  renderNoThisRoomModal = () => {
+  renderModal = (visible: boolean, title: string, info: string) => {
     return (
       <Modal
-        visible={this.state.noThisRoom}
+        visible={visible}
         closable={false}
         footer={null}
-        title="房间未找到"
+        title={title}
       >
-        <p>斗鱼没有此房间！请检查并在下方输入正确的房间号，回车确认。</p>
+        <p>{info}</p>
         <Input.Search
           placeholder="房间号"
           enterButton
@@ -186,7 +206,20 @@ export default class BasicStat extends Component<{}, IState> {
   render() {
     return (
       <div>
-        { this.renderNoThisRoomModal() }
+        { 
+          this.renderModal(
+            this.state.noThisRoom, 
+            '斗鱼无此房间！',
+            '请检查房间号，输入后回车，跳转到正确的房间'
+          ) 
+        }
+        { 
+          this.renderModal(
+            this.state.alreadyAddSameRoom, 
+            '你已经打开了此房间的管理中心！',
+            '输入新的房间号回车，跳转到新的房间'
+          ) 
+        }
 
         <Typography.Title level={4}>主播基本情况</Typography.Title>
         { this.renderRoomDyInfo() }

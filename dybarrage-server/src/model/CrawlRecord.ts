@@ -1,6 +1,7 @@
 import { Sequelize, DATE, STRING, NOW, INTEGER, Model, NUMBER } from "sequelize";
 import db from './db';
 import * as moment from "moment";
+import log4js from "../logger";
 
 // table crawl_record
 class CrawlRecord extends Model {} 
@@ -41,8 +42,10 @@ CrawlRecord.init({
   modelName: 'crawl_record'
 });
 
+const logger = log4js.getLogger('CrawlRecord');
+
 CrawlRecord.sync().then(() => {
-  console.log('CrawlRecord sync');
+  logger.info('sync');
 })
 
 export default CrawlRecord;

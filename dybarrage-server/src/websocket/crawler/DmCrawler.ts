@@ -2,6 +2,8 @@ import * as WebSocket from 'ws';
 import RawMessageHandler from './RawMessageHandler';
 import Barrage from '../../model/Barrage';
 import moment = require('moment');
+import RoomManager from '../RoomManager';
+import log4js from '../../logger';
 
 interface WSUtil {
   ws: WebSocket,
@@ -10,6 +12,7 @@ interface WSUtil {
 
 class DmCrawler {
   private crawlerWSUtilMap: Map<string, WSUtil>;
+  private logger = log4js.getLogger('DmCrawler');
 
   constructor() {
     this.crawlerWSUtilMap = new Map<string, WSUtil>();
@@ -17,9 +20,20 @@ class DmCrawler {
 
   public addCrawler = (roomId: string) => {
     const crawlerWs = new WebSocket('wss://danmuproxy.douyu.com:8506/');
+
+    crawlerWs.onerror = (ev) => {
+      const socket = RoomManager.getSocketByRoomId(roomId);
+      this.logger.error('crawler error: ' + ev.message);
+      if(socket === undefined) {
+        return;
+      }
+
+      RoomManager.singleEmitClient(socket, 'crawl_failed', '爬取弹幕出错 ' + ev.message);
+      RoomManager.stopRoomCrawlProcess(socket);
+    }
     
     crawlerWs.onopen = () => {
-      console.log(`room ${roomId} crawl process start successfully`);
+      this.logger.info(`room ${roomId} start crawling successfully`);
       const heartbeatInterval = this.prepareReceiveDm(crawlerWs, roomId);
       this.crawlerWSUtilMap.set(roomId, {
         ws: crawlerWs,
@@ -65,8 +79,7 @@ class DmCrawler {
 
     clearInterval(util?.heartbeatInterval);
     this.crawlerWSUtilMap.delete(roomId);
-
-    console.log(`room ${roomId} crawl process remove successfully`);
+    this.logger.info(`room ${roomId} stop crawling successfully`);
   }
 }
 

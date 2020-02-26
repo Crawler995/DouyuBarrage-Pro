@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { dbconfig } from '../config';
+import log4js from '../logger';
 
 const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.password, {
   host: dbconfig.host,
@@ -19,17 +20,19 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
   timezone: dbconfig.timezone
 });
 
+const logger = log4js.getLogger('db');
+
 sequelize
 .authenticate()
 .then(() => {
-  console.log('connect db');
+  logger.info('connect db');
 })
 .catch((err) => {
-  console.log('db error: ' + err);
+  logger.error(err);
 });
 
 sequelize.sync().then(() => {
-  console.log('db sync');
+  logger.info('sync');
 })
 
 export default sequelize;

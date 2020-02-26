@@ -68,7 +68,7 @@ export default class CrawlRecord extends Component<{}, IState> {
   componentDidMount() {
     this.getCrawlRecordData();
 
-    getWebSocketClient().addNeedWaitServerStartFn(this.getCrawlRecordData.bind(this));
+    getWebSocketClient().addConnectSuccessHook(() => this.getCrawlRecordData());
   }
 
   renderForm = () => {

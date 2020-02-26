@@ -1,6 +1,7 @@
 import db from './db';
 import * as moment from "moment";
 import { Sequelize, DATE, STRING, NOW, INTEGER, Model, NUMBER } from "sequelize";
+import log4js from "../logger";
 
 // table 
 class Barrage extends Model {}
@@ -52,8 +53,10 @@ Barrage.init({
   modelName: 'barrage'
 });
 
+const logger = log4js.getLogger('Barrage');
+
 Barrage.sync().then(() => {
-  console.log('Barrage sync');
+  logger.info('sync');
 })
 
 export default Barrage;

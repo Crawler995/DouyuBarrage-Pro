@@ -1,11 +1,14 @@
 type singleReceiveMsgTypes =
   'add_room_success' |
   'add_room_failed' |
+
   'start_crawl_success' |
   'start_crawl_failed' |
-  'stop_crawl_success' |
 
-  'server_stop_unexpectedly'
+  'crawl_failed' |
+
+  'stop_crawl_success' |
+  'stop_crawl_failed'
 ;
 
 export default singleReceiveMsgTypes;

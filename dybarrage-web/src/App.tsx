@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter } from "react-router-dom";
 import './App.css';
 
-import { Layout, Icon, Result, Input } from 'antd';
+import { Layout, Icon, Result, Input, message } from 'antd';
 
 import AppMain from "./components/AppMain";
 import color from './uiconfig/color';
@@ -21,7 +21,8 @@ class App extends React.Component {
 
   componentDidMount() {
     if(this.roomId !== '' && window.location.pathname !== '/') {
-      getWebSocketClient().start();
+      getWebSocketClient().addConnectSuccessHook(() => message.success('连接服务器成功！'));
+      getWebSocketClient().addConnectErrorHook(() => message.error('连接服务器失败！'));
     }
   }
 

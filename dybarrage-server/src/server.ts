@@ -6,10 +6,13 @@ import RoomManager from './websocket/RoomManager';
 
 import * as HttpDataGet from './http/dataget';
 import singleReceiveMsgTypes from './websocket/msgtype/singleReceiveMsgTypes';
+import log4js from './logger';
+
+const logger = log4js.getLogger('server');
 
 process.on('SIGINT', async () => {
-  await RoomManager.forceStopAll();
-  console.log('exit');
+  await RoomManager.removeAllRoom();
+  logger.info('exit');
   process.exit();
 });
 
@@ -25,10 +28,10 @@ app
 
 // websocket server
 const io = Socket(app.listen(3001, () => {
-  console.log('server listen on port 3001');
+  logger.info('server listen on port 3001');
 }));
 io.on('connection', (socket) => {
-  console.log('new connection');
+  logger.info('new connection');
 
   // receive 'add_room' from the client
   // means the client is prepared
