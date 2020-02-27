@@ -7,10 +7,12 @@ import SingleSendMsgTypesEnum from "./msgtype/singleSendMsgTypes";
 import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
 import { getCrawlBasicStat, getKeywordStat } from './dataget';
 import log4js from "../logger";
+import getDmSendVData from "./dataget/getDmSendVData";
+import singleReceiveMsgTypes from "./msgtype/singleReceiveMsgTypes";
 
 export interface RoomUtil {
   roomId: string,
-  intervalFlag: any,
+  intervalFlags: Array<any>,
   startCrawlTime: string,
   crawlDmNum: number,
   dmKeywords: Array<string>
@@ -18,19 +20,26 @@ export interface RoomUtil {
 
 class RoomManager {
   private roomUtilMap: Map<Socket, RoomUtil> = new Map<Socket, RoomUtil>();
-  private periodlySendMsgTypeFnMap: Map<periodlySendMsgType, (util: RoomUtil) => Promise<string>>;
   private DATA_SEND_INTERVAL: number = 1000;
   private logger = log4js.getLogger('RoomManager');
 
-  constructor() {
-    this.periodlySendMsgTypeFnMap = new Map<periodlySendMsgType, (util: RoomUtil) => Promise<string>>([
-      ['crawl_basic_stat', getCrawlBasicStat],
-      ['keyword_stat', getKeywordStat]
-    ]);
+  public singleEmitClient = (
+    socket: Socket, 
+    msgType: singleSendMsgTypes | periodlySendMsgType, 
+    msg?: string
+  ) => {
+    socket.emit(msgType, msg ?? '');
   }
 
-  public singleEmitClient = (socket: Socket, msgType: singleSendMsgTypes, msg?: string) => {
-    socket.emit(msgType, msg ?? '');
+  public startPeriodlyEmitClient = (
+    socket: Socket,
+    msgType: periodlySendMsgType,
+    dataFn: (util: RoomUtil) => Promise<string>
+  ) => {
+    const util = this.roomUtilMap.get(socket) as RoomUtil;
+    return setInterval(async () => {
+      socket.emit(msgType, await dataFn(util));
+    }, this.DATA_SEND_INTERVAL);
   }
 
   public getSocketByRoomId = (roomId: string) => {
@@ -64,22 +73,19 @@ class RoomManager {
     
     const util: RoomUtil = {
       roomId,
-      intervalFlag: 0,
+      intervalFlags: [],
       startCrawlTime: '',
       crawlDmNum: 0,
       dmKeywords: []
     };
     this.roomUtilMap.set(socket, util);
 
-    // periodly send data to new client
-    util.intervalFlag = setInterval(async () => {
-      for(const [msgType, dataGetFn] of this.periodlySendMsgTypeFnMap) {
-        socket.emit(msgType, await dataGetFn(util));
-      }
-    }, this.DATA_SEND_INTERVAL);
-
     // emit add_room_success event to client
     this.singleEmitClient(socket, 'add_room_success');
+    // for client init data
+    this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
+    this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
+    this.singleEmitClient(socket, 'dmsendv_data', await getDmSendVData(util));
 
     this.logger.info('add room ' + roomId);
   }
@@ -98,8 +104,7 @@ class RoomManager {
     if(util.startCrawlTime !== '') {
       await this.stopRoomCrawlProcess(socket);
     }
-    // stop send data periodly
-    clearInterval(util.intervalFlag);
+    
     this.roomUtilMap.delete(socket);
 
     this.logger.info('remove room ' + util.roomId);
@@ -119,6 +124,12 @@ class RoomManager {
 
     // emit startCrawlSuccess event to client
     this.singleEmitClient(socket, 'start_crawl_success');
+    // periodly send real-time data
+    util.intervalFlags.push(
+      this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat),
+      this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat),
+      this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData),
+    );
   }
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
@@ -139,11 +150,13 @@ class RoomManager {
       dm_num: util.crawlDmNum
     });
     util.startCrawlTime = '';
+    // stop send data periodly
+    util.intervalFlags.forEach(flag => clearInterval(flag));
 
     this.singleEmitClient(socket, 'stop_crawl_success');
   }
 
-  public addKeyword = (socket: Socket, keyword: string) => {
+  public addKeyword = async (socket: Socket, keyword: string) => {
     const util = this.roomUtilMap.get(socket);
     if(util === undefined) {
       this.logger.error('add keyword error');
@@ -154,9 +167,10 @@ class RoomManager {
     this.logger.info('add keyword ' + keyword);
     util.dmKeywords.push(keyword);
     this.singleEmitClient(socket, 'add_keyword_success');
+    this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
   }
 
-  public deleteKeyword = (socket: Socket, keyword: string) => {
+  public deleteKeyword = async (socket: Socket, keyword: string) => {
     const util = this.roomUtilMap.get(socket);
     if(util === undefined) {
       this.logger.error('delete keyword error');
@@ -167,6 +181,7 @@ class RoomManager {
     this.logger.info('delete keyword ' + keyword);
     util.dmKeywords = util.dmKeywords.filter(item => item !== keyword);
     this.singleEmitClient(socket, 'delete_keyword_success');
+    this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
   }
 
   public getUtilByRoomId = (roomId: string) => {

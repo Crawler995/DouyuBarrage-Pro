@@ -30,36 +30,41 @@ app
 const io = Socket(app.listen(3001, () => {
   logger.info('server listen on port 3001');
 }));
+class SocketUtil {
+  private singleReceiveMsgFnMap: Map<singleReceiveMsgTypes, (...args: any[]) => void>;
+
+  constructor(private socket: Socket.Socket) {
+    this.socket = socket;
+    this.singleReceiveMsgFnMap = new Map<singleReceiveMsgTypes, (...args: any[]) => void>([
+      ['add_room', async (roomId: string) => {
+        await RoomManager.addRoom(roomId, this.socket);
+      }],
+      ['start_crawl', () => {
+        RoomManager.startRoomCrawlProcess(this.socket);
+      }],
+      ['stop_crawl', () => {
+        RoomManager.stopRoomCrawlProcess(this.socket);
+      }],
+      ['add_keyword', async (keyword: string) => {
+        await RoomManager.addKeyword(this.socket, keyword);
+      }],
+      ['delete_keyword', async (keyword: string) => {
+        await RoomManager.deleteKeyword(this.socket, keyword);
+      }],
+      ['disconnect', () => {
+        RoomManager.removeRoom(this.socket);
+      }]
+    ]);
+  }
+
+  subscribeEvents = () => {
+    for(const [msg, fn] of this.singleReceiveMsgFnMap) {
+      this.socket.on(msg, fn);
+    }
+  }
+}
 io.on('connection', (socket) => {
   logger.info('new connection');
 
-  // receive 'add_room' from the client
-  // means the client is prepared
-  socket.on('add_room', async (roomId) => {
-    await RoomManager.addRoom(roomId, socket);
-  });
-
-  // start crawl process
-  socket.on('start_crawl', () => {
-    RoomManager.startRoomCrawlProcess(socket);
-  });
-
-  // stop crawl process
-  socket.on('stop_crawl', () => {
-    RoomManager.stopRoomCrawlProcess(socket);
-  });
-
-  // add keyword
-  socket.on('add_keyword', (keyword: string) => {
-    RoomManager.addKeyword(socket, keyword);
-  });
-  socket.on('delete_keyword', (keyword: string) => {
-    RoomManager.deleteKeyword(socket, keyword);
-  });
-
-  // the client is disconnected
-  // remove all things of the client
-  socket.on('disconnect', () => {
-    RoomManager.removeRoom(socket);
-  })
+  new SocketUtil(socket).subscribeEvents();
 });

@@ -16,6 +16,7 @@
     "axios": "^0.19.2",
     "babel-plugin-import": "^1.13.0",
     "customize-cra": "^0.9.1",
+    "echarts": "^4.6.0",
     "echarts-for-react": "^2.0.15-beta.1",
     "less": "^3.11.1",
     "less-loader": "^5.0.0",
