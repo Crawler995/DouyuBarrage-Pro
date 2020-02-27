@@ -1,11 +1,17 @@
 import { RoomUtil } from "../RoomManager";
 import IGetChartData from './IGetChartData';
 import { clientConfig } from "../../config";
+import moment = require("moment");
 
-const getXAxis = () =>{
+const arrLen = 120;
+
+const getXAxis = (): Array<string> =>{
   let res = [];
-  for(let i = 30; i > 0; i--) {
-    res.push(i);
+  let now = Date.now();
+
+  for(let i = arrLen; i > 0; i--) {
+    res.push(moment(now).format('HH:mm:ss'));
+    now -= 1000;
   }
   return res;
 }
@@ -27,37 +33,55 @@ const getStyle = () => {
       formatter: `前第{b}秒 速度{c}条/s`
     },
     xAxis: {
-      name: '前第x秒',
+      name: '时间',
       type: 'category',
       data: getXAxis(),
       boundaryGap: true,
       axisTick: {
-        alignWithLabel: true
+        alignWithLabel: true,
+        interval: 10
+      },
+      axisLabel: {
+        interval: 10
       }
     },
     yAxis: {
       name: '弹幕发送速度',
       type: 'value'
+    },
+    series: {
+      type: 'line',
+      lineStyle: {
+        color: clientConfig.primaryColor
+      },
+      symbol: 'none'
     }
   });
 };
 
 const getSeries = async (util: RoomUtil) => {
-  const {lastCrawlDmNum, crawlDmNum} = util;
+  const {dmSendV, crawlDmNum} = util;
+  if(dmSendV.yData.length === 0) {
+    util.dmSendV.yData = Array(arrLen).fill(0);
+  }
+  if(dmSendV.xData.length === 0) {
+    util.dmSendV.xData = getXAxis();
+  }
 
-  util.dmSendVData.shift();
-  util.dmSendVData.push(crawlDmNum - lastCrawlDmNum);
-  util.lastCrawlDmNum = crawlDmNum;
+  util.dmSendV.xData.shift();
+  util.dmSendV.yData.shift();
+  util.dmSendV.yData.push(crawlDmNum - dmSendV.lastCrawlDmNum);
+  util.dmSendV.xData.push(moment(Date.now()).format('HH:mm:ss'));
+  util.dmSendV.lastCrawlDmNum = crawlDmNum;
 
-  return JSON.stringify([
-    {
-      data: util.dmSendVData,
-      type: 'line',
-      lineStyle: {
-        color: clientConfig.primaryColor
-      }
+  return JSON.stringify({
+    series: {
+      data: dmSendV.yData,
+    },
+    xAxis: {
+      data: dmSendV.xData
     }
-  ]);
+  });
 };
 
 const getDmSendVData: IGetChartData = {

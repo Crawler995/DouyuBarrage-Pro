@@ -18,8 +18,11 @@ export interface RoomUtil {
   dmKeywords: Array<string>,
   // real-time data
   // barrage sending velocity
-  lastCrawlDmNum: number,
-  dmSendVData: Array<number>
+  dmSendV: {
+    lastCrawlDmNum: number,
+    yData: Array<number>,
+    xData: Array<string>
+  }
 }
 
 class RoomManager {
@@ -83,8 +86,11 @@ class RoomManager {
       startCrawlTime: '',
       crawlDmNum: 0,
       dmKeywords: [],
-      lastCrawlDmNum: 0,
-      dmSendVData: Array(30).fill(0)
+      dmSendV: {
+        xData: [],
+        yData: [],
+        lastCrawlDmNum: 0
+      }
     };
     this.roomUtilMap.set(socket, util);
 
@@ -155,9 +161,12 @@ class RoomManager {
       dm_num: util.crawlDmNum
     });
     util.startCrawlTime = '';
-    util.lastCrawlDmNum = 0;
     util.crawlDmNum = 0;
-    util.dmSendVData = Array(30).fill(0);
+    util.dmSendV = {
+      xData: [],
+      yData: [],
+      lastCrawlDmNum: 0
+    };
     // stop sending data periodly
     util.intervalFlags.forEach(flag => clearInterval(flag));
 
