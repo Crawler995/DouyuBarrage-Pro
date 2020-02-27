@@ -3,38 +3,50 @@ import * as Router from 'koa-router';
 import * as Socket from 'socket.io';
 import * as process from 'process';
 import RoomManager from './websocket/RoomManager';
-
 import * as HttpDataGet from './http/dataget';
 import singleReceiveMsgTypes from './websocket/msgtype/singleReceiveMsgTypes';
 import log4js from './logger';
 
-const logger = log4js.getLogger('server');
+export default class Server {
+  private logger = log4js.getLogger('Server');
 
-process.on('SIGINT', async () => {
-  await RoomManager.removeAllRoom();
-  logger.info('exit');
-  process.exit();
-});
+  start = () => {
+    this.catchException();
 
-const app = new Koa();
+    const app = new Koa();
+    const router = new Router();
+    router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
+    router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
+    app
+    .use(router.routes())
+    .use(router.allowedMethods());
 
-// http server
-const router = new Router();
-router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
-router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
-app
-.use(router.routes())
-.use(router.allowedMethods());
+    const io = Socket(app.listen(3001, () => {
+      this.logger.info('server listen on port 3001');
+    }));
+    io.on('connection', (socket) => {
+      this.logger.info('new connection');
+      new SocketUtil(socket).subscribeEvents();
+    });
+  }
 
-// websocket server
-const io = Socket(app.listen(3001, () => {
-  logger.info('server listen on port 3001');
-}));
+  private catchException = () => {
+    process.on('SIGINT', async () => {
+      await RoomManager.removeAllRoom();
+      this.logger.info('sigint exit');
+      process.exit();
+    });
+  }
+}
+
 class SocketUtil {
+  // receive a message, do the specific function
   private singleReceiveMsgFnMap: Map<singleReceiveMsgTypes, (...args: any[]) => void>;
 
   constructor(private socket: Socket.Socket) {
     this.socket = socket;
+    // if you want to handle a new type of message from the client
+    // you can add your solution below
     this.singleReceiveMsgFnMap = new Map<singleReceiveMsgTypes, (...args: any[]) => void>([
       ['add_room', async (roomId: string) => {
         await RoomManager.addRoom(roomId, this.socket);
@@ -42,8 +54,8 @@ class SocketUtil {
       ['start_crawl', () => {
         RoomManager.startRoomCrawlProcess(this.socket);
       }],
-      ['stop_crawl', () => {
-        RoomManager.stopRoomCrawlProcess(this.socket);
+      ['stop_crawl', async () => {
+        await RoomManager.stopRoomCrawlProcess(this.socket);
       }],
       ['add_keyword', async (keyword: string) => {
         await RoomManager.addKeyword(this.socket, keyword);
@@ -51,8 +63,8 @@ class SocketUtil {
       ['delete_keyword', async (keyword: string) => {
         await RoomManager.deleteKeyword(this.socket, keyword);
       }],
-      ['disconnect', () => {
-        RoomManager.removeRoom(this.socket);
+      ['disconnect', async () => {
+        await RoomManager.removeRoom(this.socket);
       }]
     ]);
   }
@@ -63,8 +75,3 @@ class SocketUtil {
     }
   }
 }
-io.on('connection', (socket) => {
-  logger.info('new connection');
-
-  new SocketUtil(socket).subscribeEvents();
-});

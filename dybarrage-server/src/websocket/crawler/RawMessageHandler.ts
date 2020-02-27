@@ -1,4 +1,10 @@
+// Douyu Barrage Raw Message Handler
+// detail
+// https://zhuanlan.zhihu.com/p/106697646
+// https://zhuanlan.zhihu.com/p/107200326
+
 export default class RawMessageHandler {
+  // barrage content -> Douyu protocol packet
   public static encode = (msg: string): Buffer => {
     const dataLen = msg.length + 9;
     const resLen = msg.length + 13;
@@ -20,6 +26,8 @@ export default class RawMessageHandler {
     return resBytes;
   }
 
+  // Douyu protocol packet -> barrage info string array
+  // a packet may contain several barrage info
   private static decode = (buf: Buffer): Array<string> => {
     let pos = 0;
     let msg: Array<string> = [];
@@ -54,6 +62,8 @@ export default class RawMessageHandler {
 
     decodeMsgs.forEach(decodeMsg => {
       const obj = RawMessageHandler.parseDecodeMsg(decodeMsg);
+      // only need the barrage info
+      // ignore other info (gift info...)
       if(obj.type === 'chatmsg') {
         res.push(obj);
       }

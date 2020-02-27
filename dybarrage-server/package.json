@@ -2,10 +2,10 @@
   "name": "dybarrage-server",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/entry.js",
   "scripts": {
-    "start": "tsc && node dist/server.js",
-    "watch-server": "cross-env nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/server.ts"
+    "start": "tsc && node dist/entry.js",
+    "watch-server": "cross-env nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/entry.ts"
   },
   "author": "Crawler995",
   "license": "MIT",

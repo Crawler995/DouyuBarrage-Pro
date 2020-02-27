@@ -3,15 +3,15 @@ import periodlySendMsgType from "./msgtype/periodlySendMsgType";
 import CrawlRecord from "../model/CrawlRecord";
 import * as moment from "moment";
 import DmCrawler from "./crawler/DmCrawler";
-import SingleSendMsgTypesEnum from "./msgtype/singleSendMsgTypes";
 import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
 import { getCrawlBasicStat, getKeywordStat } from './dataget';
 import log4js from "../logger";
 import getDmSendVData from "./dataget/getDmSendVData";
-import singleReceiveMsgTypes from "./msgtype/singleReceiveMsgTypes";
 
+// useful utils of a room socket
 export interface RoomUtil {
   roomId: string,
+  // flags of setInterval() (for sending data periodly)
   intervalFlags: Array<any>,
   startCrawlTime: string,
   crawlDmNum: number,
@@ -23,6 +23,7 @@ class RoomManager {
   private DATA_SEND_INTERVAL: number = 1000;
   private logger = log4js.getLogger('RoomManager');
 
+  // send msg to client once
   public singleEmitClient = (
     socket: Socket, 
     msgType: singleSendMsgTypes | periodlySendMsgType, 
@@ -31,6 +32,7 @@ class RoomManager {
     socket.emit(msgType, msg ?? '');
   }
 
+  // start to send msg to client periodly
   public startPeriodlyEmitClient = (
     socket: Socket,
     msgType: periodlySendMsgType,
@@ -80,9 +82,8 @@ class RoomManager {
     };
     this.roomUtilMap.set(socket, util);
 
-    // emit add_room_success event to client
     this.singleEmitClient(socket, 'add_room_success');
-    // for client init data
+    // for client init UI
     this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
     this.singleEmitClient(socket, 'dmsendv_data', await getDmSendVData(util));
@@ -95,16 +96,15 @@ class RoomManager {
     // there is a connection between client and server
     // but the client 'add_room_failed'
     // so there's no util in the map
+    // now the client is closed, so needn't emit client something
     if(util === undefined) {
       return;
     }
-
     // if started crawling before
     // stop it
     if(util.startCrawlTime !== '') {
       await this.stopRoomCrawlProcess(socket);
     }
-    
     this.roomUtilMap.delete(socket);
 
     this.logger.info('remove room ' + util.roomId);
@@ -122,9 +122,8 @@ class RoomManager {
     DmCrawler.addCrawler(util.roomId);
     util.startCrawlTime = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
-    // emit startCrawlSuccess event to client
     this.singleEmitClient(socket, 'start_crawl_success');
-    // periodly send real-time data
+    // start periodly sending real-time data
     util.intervalFlags.push(
       this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat),
       this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat),
@@ -142,7 +141,7 @@ class RoomManager {
     }
     
     DmCrawler.removeCrawler(util.roomId);
-    // insert crawl record to database
+    // insert a crawl record to database
     await CrawlRecord.upsert({
       start_time: util.startCrawlTime,
       stop_time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
@@ -150,7 +149,7 @@ class RoomManager {
       dm_num: util.crawlDmNum
     });
     util.startCrawlTime = '';
-    // stop send data periodly
+    // stop sending data periodly
     util.intervalFlags.forEach(flag => clearInterval(flag));
 
     this.singleEmitClient(socket, 'stop_crawl_success');
@@ -164,10 +163,12 @@ class RoomManager {
       return;
     }
 
-    this.logger.info('add keyword ' + keyword);
     util.dmKeywords.push(keyword);
     this.singleEmitClient(socket, 'add_keyword_success');
+    // when user add a keyword, the server should send the data once for client to update UI
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
+
+    this.logger.info('add keyword ' + keyword);
   }
 
   public deleteKeyword = async (socket: Socket, keyword: string) => {
@@ -178,10 +179,12 @@ class RoomManager {
       return;
     }
 
-    this.logger.info('delete keyword ' + keyword);
     util.dmKeywords = util.dmKeywords.filter(item => item !== keyword);
     this.singleEmitClient(socket, 'delete_keyword_success');
+    // when user delete a keyword, the server should send the data once for client to update UI
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
+
+    this.logger.info('delete keyword ' + keyword);
   }
 
   public getUtilByRoomId = (roomId: string) => {
@@ -192,8 +195,7 @@ class RoomManager {
     }
   }
 
-  // stop all crawl process
-  // write all crawl record to db
+  // when server close
   public removeAllRoom = async () => {
     for(const [socket, util] of this.roomUtilMap) {
       await this.removeRoom(socket);

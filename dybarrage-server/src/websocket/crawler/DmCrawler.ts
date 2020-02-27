@@ -5,6 +5,11 @@ import moment = require('moment');
 import RoomManager from '../RoomManager';
 import log4js from '../../logger';
 
+// Douyu Barrage Crawler
+// detail
+// https://zhuanlan.zhihu.com/p/106697646
+// https://zhuanlan.zhihu.com/p/107200326
+
 interface WSUtil {
   ws: WebSocket,
   heartbeatInterval: any
@@ -34,6 +39,7 @@ class DmCrawler {
     
     crawlerWs.onopen = () => {
       this.logger.info(`room ${roomId} start crawling successfully`);
+      // start to send heartbeat to Douyu server
       const heartbeatInterval = this.prepareReceiveDm(crawlerWs, roomId);
       this.crawlerWSUtilMap.set(roomId, {
         ws: crawlerWs,
@@ -43,8 +49,10 @@ class DmCrawler {
 
     crawlerWs.onmessage = (ev: WebSocket.MessageEvent) => {
       const buf: Buffer = ev.data as Buffer;
+      // convert Buffer to parsed and readable msg obj
       const msgsObj = RawMessageHandler.getMsgsObj(buf);
       msgsObj.forEach(msgObj => {
+        // insert Barrage to database
         Barrage.upsert({
           id: msgObj.cid,
           time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
@@ -60,6 +68,7 @@ class DmCrawler {
     }
   }
 
+  // login and join group
   private prepareReceiveDm = (crawlerWs: WebSocket, roomId: string) => {
     crawlerWs.send(RawMessageHandler.encode(`type@=loginreq/room_id@=${roomId}/dfl@=sn@A=105@Sss@A=1/username@=61609154/uid@=61609154/ver@=20190610/aver@=218101901/ct@=0/`));
     crawlerWs.send(RawMessageHandler.encode(`type@=joingroup/rid@=${roomId}/gid@=-9999/`));
@@ -74,11 +83,15 @@ class DmCrawler {
 
   public removeCrawler = (roomId: string) => {
     const util = this.crawlerWSUtilMap.get(roomId);
-    util?.ws.send(RawMessageHandler.encode('type@=logout/'));
-    util?.ws.close();
-
-    clearInterval(util?.heartbeatInterval);
+    // util will be removed before if error occured when crawling
+    if(util === undefined) {
+      return;
+    }
+    util.ws.send(RawMessageHandler.encode('type@=logout/'));
+    util.ws.close();
+    clearInterval(util.heartbeatInterval);
     this.crawlerWSUtilMap.delete(roomId);
+
     this.logger.info(`room ${roomId} stop crawling successfully`);
   }
 }
