@@ -37,10 +37,15 @@ export default class Chart extends Component<IProps, IState> {
 
   render() {
     return (
-      <ReactEcharts
-        option={this.state.option}
-        style={{ width: '100%', height: '100%' }}
-      />
+      <div style={{
+        width: '100%',
+        height: 'calc(100vh - 130px)'
+      }}>
+        <ReactEcharts
+          option={this.state.option}
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
     );
   }
 }

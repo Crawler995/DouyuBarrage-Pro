@@ -7,6 +7,7 @@ import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
 import { getCrawlBasicStat, getKeywordStat } from './dataget';
 import log4js from "../logger";
 import getDmSendVData from "./dataget/getDmSendVData";
+import getDmLevelData from "./dataget/getDmLevelData";
 
 // useful utils of a room socket
 export interface RoomUtil {
@@ -99,6 +100,8 @@ class RoomManager {
     this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
     this.singleEmitClient(socket, 'dmsendv_data', getDmSendVData.getStyle());
+    this.singleEmitClient(socket, 'dmlevel_data', getDmLevelData.getStyle());
+    this.singleEmitClient(socket, 'dmlevel_data', await getDmLevelData.getSeries(util));
 
     this.logger.info('add room ' + roomId);
   }
@@ -140,6 +143,7 @@ class RoomManager {
       this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat),
       this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat),
       this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData.getSeries),
+      this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries)
     );
   }
 
