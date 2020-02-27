@@ -1,6 +1,5 @@
-import React, { Component } from 'react'
-import Chart from './Chart'
-import { Typography } from 'antd'
+import React, { Component } from 'react';
+import Chart from './Chart';
 
 export default class DmSendV extends Component {
   render() {
@@ -8,14 +7,12 @@ export default class DmSendV extends Component {
       <div>
         <div style={{
           width: '100%',
-          height: '60vh'
+          height: 'calc(100vh - 130px)'
         }}>
           <Chart
             dataEventId="dmsendv_data"
           />
         </div>
-
-        <Typography.Title level={4}>实时弹幕发送速度</Typography.Title>
       </div>
     )
   }

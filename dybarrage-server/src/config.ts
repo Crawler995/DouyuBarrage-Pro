@@ -6,3 +6,7 @@ export const dbconfig = {
   db: 'dybarrage_pro',
   timezone: '+08:00'
 };
+
+export const clientConfig = {
+  'primaryColor': '#ffa940'
+};

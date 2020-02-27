@@ -15,7 +15,11 @@ export interface RoomUtil {
   intervalFlags: Array<any>,
   startCrawlTime: string,
   crawlDmNum: number,
-  dmKeywords: Array<string>
+  dmKeywords: Array<string>,
+  // real-time data
+  // barrage sending velocity
+  lastCrawlDmNum: number,
+  dmSendVData: Array<number>
 }
 
 class RoomManager {
@@ -78,7 +82,9 @@ class RoomManager {
       intervalFlags: [],
       startCrawlTime: '',
       crawlDmNum: 0,
-      dmKeywords: []
+      dmKeywords: [],
+      lastCrawlDmNum: 0,
+      dmSendVData: Array(30).fill(0)
     };
     this.roomUtilMap.set(socket, util);
 
@@ -86,7 +92,7 @@ class RoomManager {
     // for client init UI
     this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
-    this.singleEmitClient(socket, 'dmsendv_data', await getDmSendVData(util));
+    this.singleEmitClient(socket, 'dmsendv_data', getDmSendVData.getStyle());
 
     this.logger.info('add room ' + roomId);
   }
@@ -127,7 +133,7 @@ class RoomManager {
     util.intervalFlags.push(
       this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat),
       this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat),
-      this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData),
+      this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData.getSeries),
     );
   }
 
@@ -149,6 +155,9 @@ class RoomManager {
       dm_num: util.crawlDmNum
     });
     util.startCrawlTime = '';
+    util.lastCrawlDmNum = 0;
+    util.crawlDmNum = 0;
+    util.dmSendVData = Array(30).fill(0);
     // stop sending data periodly
     util.intervalFlags.forEach(flag => clearInterval(flag));
 

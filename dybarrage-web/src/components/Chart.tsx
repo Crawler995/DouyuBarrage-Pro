@@ -12,12 +12,16 @@ interface IState {
 }
 
 export default class Chart extends Component<IProps, IState> {
+  private isFirstGetData: boolean;
+
   constructor(props: IProps) {
     super(props);
 
     this.state = {
       option: {}
     }
+
+    this.isFirstGetData = true;
   }
   
   subscribeEvents = () => {
@@ -32,7 +36,12 @@ export default class Chart extends Component<IProps, IState> {
   }
 
   setOption = (option: ObjectMap) => {
-    this.setState({ option });
+    if(this.isFirstGetData) {
+      this.setState({ option });
+      this.isFirstGetData = false;
+    } else {
+      this.setState({ option: {...this.state.option, series: option} });
+    }
   }
 
   render() {
