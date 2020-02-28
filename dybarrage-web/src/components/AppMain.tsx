@@ -8,6 +8,7 @@ import CrawlRecord from './CrawlRecord';
 import getRoomId from '../util/getRoomId';
 import KeywordStat from './KeywordStat';
 import Chart from './Chart';
+import DmSendV from './DmSendV';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -43,7 +44,7 @@ const AppMain: React.SFC = () => {
         { noUnmountedWhenRouteChangesRoute('/crawlrec', <CrawlRecord />) }
         { noUnmountedWhenRouteChangesRoute('/keywordstat', <KeywordStat />)}
 
-        { noUnmountedWhenRouteChangesRoute('/dmsendv', <Chart dataEventId="dmsendv_data" />)}
+        { noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
         { noUnmountedWhenRouteChangesRoute('/dmlevel', <Chart dataEventId="dmlevel_data" />)}
       </Content>
     </Layout>
