@@ -30,7 +30,7 @@ const getStyle = () => {
           backgroundColor: clientConfig.primaryColor
         }
       },
-      formatter: `前第{b}秒 速度{c}条/s`
+      formatter: `{b} 速度{c}条/s`
     },
     xAxis: {
       name: '时间',
