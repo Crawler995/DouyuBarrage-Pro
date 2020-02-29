@@ -1,3 +1,12 @@
 body {
   overflow-y: hidden;
 }
+
+@keyframes barrage-move {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-200vw, 0, 0);
+  }
+}

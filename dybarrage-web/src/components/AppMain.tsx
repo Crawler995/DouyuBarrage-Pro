@@ -9,6 +9,7 @@ import getRoomId from '../util/getRoomId';
 import KeywordStat from './KeywordStat';
 import Chart from './Chart';
 import DmSendV from './DmSendV';
+import BarrageWall from './BarrageWall';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -39,6 +40,13 @@ const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) 
 const AppMain: React.SFC = () => {
   return (
     <Layout>
+      <BarrageWall 
+        moveTime={12}
+        fontSize={18}
+        showAvatar={false}
+        opacity={0.8}
+      />
+      
       <Sider width={250} style={{ background: '#fff' }}>
         <AppMenu />
       </Sider>
