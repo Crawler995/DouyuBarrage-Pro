@@ -10,3 +10,5 @@ export const dbconfig = {
 export const clientConfig = {
   primaryColor: '#ffa940'
 };
+
+export const DATA_SEND_INTERVAL = 2000;

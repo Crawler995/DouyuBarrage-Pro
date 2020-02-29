@@ -84,6 +84,18 @@ class SocketUtil {
         async () => {
           await RoomManager.removeRoom(this.socket);
         }
+      ],
+      [
+        'request_send_dm',
+        () => {
+          RoomManager.startPeriodlySendBarrages(this.socket);
+        }
+      ],
+      [
+        'stop_send_dm',
+        () => {
+          RoomManager.stopPeriodlySendBarrages(this.socket);
+        }
       ]
     ]);
   }

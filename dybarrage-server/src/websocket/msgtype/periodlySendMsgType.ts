@@ -5,6 +5,6 @@ type periodlySendMsgType =
   | 'keyword_stat'
   | 'dmsendv_data'
   | 'dmlevel_data'
-  | 'lastsec_dm';
+  | 'cur_dm';
 
 export default periodlySendMsgType;

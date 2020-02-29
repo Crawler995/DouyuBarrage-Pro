@@ -8,13 +8,14 @@ import { getCrawlBasicStat, getKeywordStat } from './dataget';
 import log4js from '../logger';
 import getDmSendVData from './dataget/getDmSendVData';
 import getDmLevelData from './dataget/getDmLevelData';
-import getLastSecBarrage from './dataget/getLastSecBarrage';
+import getCurBarrages from './dataget/getCurBarrages';
+import { DATA_SEND_INTERVAL } from '../config';
 
 // useful utils of a room socket
 export interface RoomUtil {
   roomId: string;
   // flags of setInterval() (for sending data periodly)
-  intervalFlags: Array<any>;
+  intervalFlags: Array<{ msgType: string; flag: any }>;
   startCrawlTime: string;
   crawlDmNum: number;
   dmKeywords: Array<string>;
@@ -29,7 +30,7 @@ export interface RoomUtil {
 
 class RoomManager {
   private roomUtilMap: Map<Socket, RoomUtil> = new Map<Socket, RoomUtil>();
-  private DATA_SEND_INTERVAL = 1000;
+  private DATA_SEND_INTERVAL = DATA_SEND_INTERVAL;
   private logger = log4js.getLogger('RoomManager');
 
   // send msg to client once
@@ -48,9 +49,10 @@ class RoomManager {
     dataFn: (util: RoomUtil) => Promise<string>
   ) => {
     const util = this.roomUtilMap.get(socket) as RoomUtil;
-    return setInterval(async () => {
+    const flag = setInterval(async () => {
       socket.emit(msgType, await dataFn(util));
     }, this.DATA_SEND_INTERVAL);
+    util.intervalFlags.push({ msgType, flag });
   };
 
   public getSocketByRoomId = (roomId: string) => {
@@ -140,13 +142,10 @@ class RoomManager {
 
     this.singleEmitClient(socket, 'start_crawl_success');
     // start periodly sending real-time data
-    util.intervalFlags.push(
-      this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat),
-      this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat),
-      this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData.getSeries),
-      this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries),
-      this.startPeriodlyEmitClient(socket, 'lastsec_dm', getLastSecBarrage)
-    );
+    this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat);
+    this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat);
+    this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData.getSeries);
+    this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries);
   };
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
@@ -174,7 +173,7 @@ class RoomManager {
       lastCrawlDmNum: 0
     };
     // stop sending data periodly
-    util.intervalFlags.forEach(flag => clearInterval(flag));
+    util.intervalFlags.forEach(item => clearInterval(item.flag));
 
     this.singleEmitClient(socket, 'stop_crawl_success');
   };
@@ -209,6 +208,25 @@ class RoomManager {
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
 
     this.logger.info('delete keyword ' + keyword);
+  };
+
+  public startPeriodlySendBarrages = (socket: Socket) => {
+    this.startPeriodlyEmitClient(socket, 'cur_dm', getCurBarrages);
+    this.logger.info('start send barrages to room ' + this.roomUtilMap.get(socket)?.roomId);
+  };
+
+  public stopPeriodlySendBarrages = (socket: Socket) => {
+    const util = this.roomUtilMap.get(socket) as RoomUtil;
+    if (util === undefined) {
+      return;
+    }
+    const res = util.intervalFlags.filter(item => item.msgType === 'cur_dm');
+    if (res.length === 0) {
+      return;
+    }
+    const flag = res[0].flag;
+    clearInterval(flag);
+    util.intervalFlags = util.intervalFlags.filter(item => item.msgType !== 'cur_dm');
   };
 
   public getUtilByRoomId = (roomId: string) => {

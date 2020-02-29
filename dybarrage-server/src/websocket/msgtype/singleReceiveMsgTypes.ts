@@ -6,6 +6,8 @@ type singleReceiveMsgTypes =
   | 'stop_crawl'
   | 'add_keyword'
   | 'delete_keyword'
+  | 'request_send_dm'
+  | 'stop_send_dm'
   | 'disconnect';
 
 export default singleReceiveMsgTypes;

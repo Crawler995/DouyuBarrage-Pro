@@ -40,13 +40,8 @@ const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) 
 const AppMain: React.SFC = () => {
   return (
     <Layout>
-      <BarrageWall 
-        moveTime={12}
-        fontSize={18}
-        showAvatar={false}
-        opacity={0.8}
-      />
-      
+      <BarrageWall />
+
       <Sider width={250} style={{ background: '#fff' }}>
         <AppMenu />
       </Sider>

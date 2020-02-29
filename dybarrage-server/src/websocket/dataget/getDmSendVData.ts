@@ -1,6 +1,6 @@
 import { RoomUtil } from '../RoomManager';
 import IGetChartData from './IGetChartData';
-import { clientConfig } from '../../config';
+import { clientConfig, DATA_SEND_INTERVAL } from '../../config';
 import * as moment from 'moment';
 
 const arrLen = 120;
@@ -11,7 +11,7 @@ const getXAxis = (): Array<string> => {
 
   for (let i = arrLen; i > 0; i--) {
     res.push(moment(now).format('HH:mm:ss'));
-    now -= 1000;
+    now -= DATA_SEND_INTERVAL;
   }
   return res;
 };
@@ -70,7 +70,7 @@ const getSeries = async (util: RoomUtil) => {
 
   util.dmSendV.xData.shift();
   util.dmSendV.yData.shift();
-  util.dmSendV.yData.push(crawlDmNum - dmSendV.lastCrawlDmNum);
+  util.dmSendV.yData.push((crawlDmNum - dmSendV.lastCrawlDmNum) / DATA_SEND_INTERVAL / 1000);
   util.dmSendV.xData.push(moment(Date.now()).format('HH:mm:ss'));
   util.dmSendV.lastCrawlDmNum = crawlDmNum;
 
