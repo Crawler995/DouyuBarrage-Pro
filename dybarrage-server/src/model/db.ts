@@ -23,16 +23,16 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
 const logger = log4js.getLogger('db');
 
 sequelize
-.authenticate()
-.then(() => {
-  logger.info('connect db');
-})
-.catch((err) => {
-  logger.error(err);
-});
+  .authenticate()
+  .then(() => {
+    logger.info('connect db');
+  })
+  .catch(err => {
+    logger.error(err);
+  });
 
 sequelize.sync().then(() => {
   logger.info('sync');
-})
+});
 
 export default sequelize;

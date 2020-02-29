@@ -30,6 +30,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
+    "format": "prettier --config .prettierrc --write ./src/**/*.{ts,tsx}",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
@@ -49,5 +50,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "devDependencies": {
+    "prettier": "^1.19.1"
+  }
 }

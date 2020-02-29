@@ -1,12 +1,15 @@
-import { RoomUtil } from "../RoomManager";
-import Barrage from "../../model/Barrage";
-import moment = require("moment");
+import { RoomUtil } from '../RoomManager';
+import Barrage from '../../model/Barrage';
+import * as moment from 'moment';
 
-export default async (util: RoomUtil) => {
+export default async (util: RoomUtil): Promise<string> => {
   const res = await Barrage.findAll({
     attributes: [
-      'sender_name', 'sender_level', 'sender_avatar_url',
-      'badge_name', 'badge_level',
+      'sender_name',
+      'sender_level',
+      'sender_avatar_url',
+      'badge_name',
+      'badge_level',
       'dm_content'
     ],
     where: {

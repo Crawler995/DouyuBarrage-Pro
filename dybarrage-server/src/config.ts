@@ -8,5 +8,5 @@ export const dbconfig = {
 };
 
 export const clientConfig = {
-  'primaryColor': '#ffa940'
+  primaryColor: '#ffa940'
 };

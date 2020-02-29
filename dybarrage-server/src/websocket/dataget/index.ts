@@ -1,7 +1,4 @@
-import getCrawlBasicStat from "./getCrawlBasicStat";
+import getCrawlBasicStat from './getCrawlBasicStat';
 import getKeywordStat from './getKeywordStat';
 
-export {
-  getCrawlBasicStat,
-  getKeywordStat
-};
+export { getCrawlBasicStat, getKeywordStat };

@@ -15,21 +15,21 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
     let roomDyInfo;
     let statusCode = 200;
 
-    if(roomDyInfoRes.status === 200) {
-      if(roomDyInfoRes.data.error === 0) {
+    if (roomDyInfoRes.status === 200) {
+      if (roomDyInfoRes.data.error === 0) {
         roomDyInfo = roomDyInfoRes.data;
       } else {
         roomDyInfo = {
           error: 404,
           data: '房间未找到'
-        }
+        };
         statusCode = 404;
       }
-    } else if(roomDyInfoRes.status === 404) {
+    } else if (roomDyInfoRes.status === 404) {
       roomDyInfo = {
         error: 404,
         data: '房间未找到'
-      }
+      };
       statusCode = 404;
     }
 
@@ -41,6 +41,6 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
     ctx.body = {
       error: 500,
       data: '网络无连接'
-    }
+    };
   }
 };

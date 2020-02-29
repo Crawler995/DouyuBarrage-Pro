@@ -2,14 +2,14 @@
 const getRoomId = (): string => {
   const search = window.location.search;
 
-  if(search === '') {
+  if (search === '') {
     return '';
   }
 
   const regx = /roomid=(\d+)/;
   const arr = search.match(regx);
 
-  if(arr === null) {
+  if (arr === null) {
     return '';
   }
 

@@ -12,20 +12,28 @@ import DmSendV from './DmSendV';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
-  return <Route exact path={path} children={(props) => {
-    // '/' redirects to '/basic'
-    if(props.location.pathname === '/') {
-      window.location.href = `http://localhost:3000/basic?roomid=${getRoomId()}`;
-      return <div></div>;
-    }
-    return (
-      <div style={{
-        display: props.location.pathname === path ? 'block' : 'none'
-      }}>
-        {component}
-      </div>
-    )
-  }} />;
+  return (
+    <Route
+      exact
+      path={path}
+      children={props => {
+        // '/' redirects to '/basic'
+        if (props.location.pathname === '/') {
+          window.location.href = `http://localhost:3000/basic?roomid=${getRoomId()}`;
+          return <div></div>;
+        }
+        return (
+          <div
+            style={{
+              display: props.location.pathname === path ? 'block' : 'none'
+            }}
+          >
+            {component}
+          </div>
+        );
+      }}
+    />
+  );
 };
 
 const AppMain: React.SFC = () => {
@@ -35,20 +43,22 @@ const AppMain: React.SFC = () => {
         <AppMenu />
       </Sider>
 
-      <Content style={{ 
-        padding: '30px', 
-        minHeight: `${window.innerHeight - 64}px`, 
-        background: '#fff' 
-      }}>
-        { noUnmountedWhenRouteChangesRoute('/basic', <BasicStat />) }
-        { noUnmountedWhenRouteChangesRoute('/crawlrec', <CrawlRecord />) }
-        { noUnmountedWhenRouteChangesRoute('/keywordstat', <KeywordStat />)}
+      <Content
+        style={{
+          padding: '30px',
+          minHeight: `${window.innerHeight - 64}px`,
+          background: '#fff'
+        }}
+      >
+        {noUnmountedWhenRouteChangesRoute('/basic', <BasicStat />)}
+        {noUnmountedWhenRouteChangesRoute('/crawlrec', <CrawlRecord />)}
+        {noUnmountedWhenRouteChangesRoute('/keywordstat', <KeywordStat />)}
 
-        { noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
-        { noUnmountedWhenRouteChangesRoute('/dmlevel', <Chart dataEventId="dmlevel_data" />)}
+        {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
+        {noUnmountedWhenRouteChangesRoute('/dmlevel', <Chart dataEventId="dmlevel_data" />)}
       </Content>
     </Layout>
   );
-}
+};
 
 export default AppMain;

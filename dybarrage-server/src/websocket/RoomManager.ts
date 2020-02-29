@@ -1,45 +1,45 @@
-import { Socket } from "socket.io";
-import periodlySendMsgType from "./msgtype/periodlySendMsgType";
-import CrawlRecord from "../model/CrawlRecord";
-import * as moment from "moment";
-import DmCrawler from "./crawler/DmCrawler";
-import singleSendMsgTypes from "./msgtype/singleSendMsgTypes";
+import { Socket } from 'socket.io';
+import periodlySendMsgType from './msgtype/periodlySendMsgType';
+import CrawlRecord from '../model/CrawlRecord';
+import * as moment from 'moment';
+import DmCrawler from './crawler/DmCrawler';
+import singleSendMsgTypes from './msgtype/singleSendMsgTypes';
 import { getCrawlBasicStat, getKeywordStat } from './dataget';
-import log4js from "../logger";
-import getDmSendVData from "./dataget/getDmSendVData";
-import getDmLevelData from "./dataget/getDmLevelData";
-import getLastSecBarrage from "./dataget/getLastSecBarrage";
+import log4js from '../logger';
+import getDmSendVData from './dataget/getDmSendVData';
+import getDmLevelData from './dataget/getDmLevelData';
+import getLastSecBarrage from './dataget/getLastSecBarrage';
 
 // useful utils of a room socket
 export interface RoomUtil {
-  roomId: string,
+  roomId: string;
   // flags of setInterval() (for sending data periodly)
-  intervalFlags: Array<any>,
-  startCrawlTime: string,
-  crawlDmNum: number,
-  dmKeywords: Array<string>,
+  intervalFlags: Array<any>;
+  startCrawlTime: string;
+  crawlDmNum: number;
+  dmKeywords: Array<string>;
   // real-time data
   // barrage sending velocity
   dmSendV: {
-    lastCrawlDmNum: number,
-    yData: Array<number>,
-    xData: Array<string>
-  }
+    lastCrawlDmNum: number;
+    yData: Array<number>;
+    xData: Array<string>;
+  };
 }
 
 class RoomManager {
   private roomUtilMap: Map<Socket, RoomUtil> = new Map<Socket, RoomUtil>();
-  private DATA_SEND_INTERVAL: number = 1000;
+  private DATA_SEND_INTERVAL = 1000;
   private logger = log4js.getLogger('RoomManager');
 
   // send msg to client once
   public singleEmitClient = (
-    socket: Socket, 
-    msgType: singleSendMsgTypes | periodlySendMsgType, 
+    socket: Socket,
+    msgType: singleSendMsgTypes | periodlySendMsgType,
     msg?: string
   ) => {
     socket.emit(msgType, msg ?? '');
-  }
+  };
 
   // start to send msg to client periodly
   public startPeriodlyEmitClient = (
@@ -51,37 +51,37 @@ class RoomManager {
     return setInterval(async () => {
       socket.emit(msgType, await dataFn(util));
     }, this.DATA_SEND_INTERVAL);
-  }
+  };
 
   public getSocketByRoomId = (roomId: string) => {
-    for(const [socket, util] of this.roomUtilMap) {
-      if(util.roomId === roomId) {
+    for (const [socket, util] of this.roomUtilMap) {
+      if (util.roomId === roomId) {
         return socket;
       }
     }
-  }
+  };
 
   public hasRoom = (roomId: string): boolean => {
-    for(const [socket, util] of this.roomUtilMap) {
-      if(util.roomId === roomId) {
+    for (const [socket, util] of this.roomUtilMap) {
+      if (util.roomId === roomId) {
         return true;
       }
     }
     return false;
-  }
+  };
 
   public addRoom = async (roomId: string, socket: Socket) => {
-    if(roomId === '') {
+    if (roomId === '') {
       this.singleEmitClient(socket, 'add_room_failed', '房间号为空！');
       this.logger.error('roomId is empty');
       return;
     }
-    if(this.hasRoom(roomId)) {
+    if (this.hasRoom(roomId)) {
       this.singleEmitClient(socket, 'add_room_failed', '已有相同房间号的客户端加入！');
       this.logger.error('there is the same room existed');
       return;
     }
-    
+
     const util: RoomUtil = {
       roomId,
       intervalFlags: [],
@@ -105,7 +105,7 @@ class RoomManager {
     this.singleEmitClient(socket, 'dmlevel_data', await getDmLevelData.getSeries(util));
 
     this.logger.info('add room ' + roomId);
-  }
+  };
 
   public removeRoom = async (socket: Socket) => {
     const util = this.roomUtilMap.get(socket);
@@ -113,24 +113,24 @@ class RoomManager {
     // but the client 'add_room_failed'
     // so there's no util in the map
     // now the client is closed, so needn't emit client something
-    if(util === undefined) {
+    if (util === undefined) {
       return;
     }
     // if started crawling before
     // stop it
-    if(util.startCrawlTime !== '') {
+    if (util.startCrawlTime !== '') {
       await this.stopRoomCrawlProcess(socket);
     }
     this.roomUtilMap.delete(socket);
 
     this.logger.info('remove room ' + util.roomId);
-  }
+  };
 
   public startRoomCrawlProcess = (socket: Socket) => {
     const util = this.roomUtilMap.get(socket);
     // same as above
-    if(util === undefined) {
-      this.logger.error('try to start crawling before \'add room success\'');
+    if (util === undefined) {
+      this.logger.error("try to start crawling before 'add room success'");
       this.singleEmitClient(socket, 'start_crawl_failed', '还未成功加入服务器！');
       return;
     }
@@ -147,17 +147,17 @@ class RoomManager {
       this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries),
       this.startPeriodlyEmitClient(socket, 'lastsec_dm', getLastSecBarrage)
     );
-  }
+  };
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
     const util = this.roomUtilMap.get(socket);
     // same as above
-    if(util === undefined || util.startCrawlTime === '') {
+    if (util === undefined || util.startCrawlTime === '') {
       this.logger.error('try to stop crawling before starting crawling');
       this.singleEmitClient(socket, 'stop_crawl_failed', '还未开始抓取');
       return;
     }
-    
+
     DmCrawler.removeCrawler(util.roomId);
     // insert a crawl record to database
     await CrawlRecord.upsert({
@@ -177,11 +177,11 @@ class RoomManager {
     util.intervalFlags.forEach(flag => clearInterval(flag));
 
     this.singleEmitClient(socket, 'stop_crawl_success');
-  }
+  };
 
   public addKeyword = async (socket: Socket, keyword: string) => {
     const util = this.roomUtilMap.get(socket);
-    if(util === undefined) {
+    if (util === undefined) {
       this.logger.error('add keyword error');
       this.singleEmitClient(socket, 'add_keyword_failed', '还未成功加入服务器！');
       return;
@@ -193,11 +193,11 @@ class RoomManager {
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
 
     this.logger.info('add keyword ' + keyword);
-  }
+  };
 
   public deleteKeyword = async (socket: Socket, keyword: string) => {
     const util = this.roomUtilMap.get(socket);
-    if(util === undefined) {
+    if (util === undefined) {
       this.logger.error('delete keyword error');
       this.singleEmitClient(socket, 'delete_keyword_failed', '还未成功加入服务器！');
       return;
@@ -209,24 +209,24 @@ class RoomManager {
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
 
     this.logger.info('delete keyword ' + keyword);
-  }
+  };
 
   public getUtilByRoomId = (roomId: string) => {
-    for(const [socket, util] of this.roomUtilMap) {
-      if(roomId === util.roomId) {
+    for (const [socket, util] of this.roomUtilMap) {
+      if (roomId === util.roomId) {
         return util;
       }
     }
-  }
+  };
 
   // when server close
   public removeAllRoom = async () => {
-    for(const [socket, util] of this.roomUtilMap) {
+    for (const [socket, util] of this.roomUtilMap) {
       await this.removeRoom(socket);
     }
 
     this.logger.info('force to remove all room');
-  }
+  };
 }
 
 export default new RoomManager();

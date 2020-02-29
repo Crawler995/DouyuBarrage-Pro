@@ -1,20 +1,20 @@
-import { RoomUtil } from "../RoomManager";
+import { RoomUtil } from '../RoomManager';
 import IGetChartData from './IGetChartData';
-import { clientConfig } from "../../config";
-import moment = require("moment");
+import { clientConfig } from '../../config';
+import * as moment from 'moment';
 
 const arrLen = 120;
 
-const getXAxis = (): Array<string> =>{
+const getXAxis = (): Array<string> => {
   let res = [];
   let now = Date.now();
 
-  for(let i = arrLen; i > 0; i--) {
+  for (let i = arrLen; i > 0; i--) {
     res.push(moment(now).format('HH:mm:ss'));
     now -= 1000;
   }
   return res;
-}
+};
 
 const getStyle = () => {
   return JSON.stringify({
@@ -22,7 +22,7 @@ const getStyle = () => {
       text: '实时弹幕发送速度',
       x: 'center'
     },
-    tooltip : {
+    tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross',
@@ -60,11 +60,11 @@ const getStyle = () => {
 };
 
 const getSeries = async (util: RoomUtil) => {
-  const {dmSendV, crawlDmNum} = util;
-  if(dmSendV.yData.length === 0) {
+  const { dmSendV, crawlDmNum } = util;
+  if (dmSendV.yData.length === 0) {
     util.dmSendV.yData = Array(arrLen).fill(0);
   }
-  if(dmSendV.xData.length === 0) {
+  if (dmSendV.xData.length === 0) {
     util.dmSendV.xData = getXAxis();
   }
 
@@ -76,7 +76,7 @@ const getSeries = async (util: RoomUtil) => {
 
   return JSON.stringify({
     series: {
-      data: dmSendV.yData,
+      data: dmSendV.yData
     },
     xAxis: {
       data: dmSendV.xData
@@ -85,7 +85,8 @@ const getSeries = async (util: RoomUtil) => {
 };
 
 const getDmSendVData: IGetChartData = {
-  getStyle, getSeries
+  getStyle,
+  getSeries
 };
 
 export default getDmSendVData;

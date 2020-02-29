@@ -13,11 +13,14 @@ export const getCrawlRecord = (
   startTime?: string,
   stopTime?: string,
   offset?: number,
-  limit?:number
+  limit?: number
 ) => {
   return axiosIns.get(`/room/${getRoomId()}/crawlrec?`, {
     params: {
-      startTime, stopTime, offset, limit
+      startTime,
+      stopTime,
+      offset,
+      limit
     }
   });
-}
+};

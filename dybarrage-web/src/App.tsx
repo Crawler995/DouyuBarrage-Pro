@@ -1,10 +1,10 @@
 import React from 'react';
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter } from 'react-router-dom';
 import './App.css';
 
 import { Layout, Icon, Result, Input, message } from 'antd';
 
-import AppMain from "./components/AppMain";
+import AppMain from './components/AppMain';
 import color from './uiconfig/color';
 import getRoomId from './util/getRoomId';
 import getWebSocketClient from './network/websocket/WebSocketClient';
@@ -20,22 +20,24 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if(this.roomId !== '' && window.location.pathname !== '/') {
+    if (this.roomId !== '' && window.location.pathname !== '/') {
       getWebSocketClient().addConnectSuccessHook(() => message.success('连接服务器成功！'));
       getWebSocketClient().addConnectErrorHook(() => message.error('连接服务器失败！'));
     }
   }
 
   render() {
-    if(this.roomId === '') {
+    if (this.roomId === '') {
       return (
-        <div style={{
-          boxSizing: 'border-box',
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          paddingTop: '10vh'
-        }}>
+        <div
+          style={{
+            boxSizing: 'border-box',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            paddingTop: '10vh'
+          }}
+        >
           <Result
             icon={<Icon type="plus-circle" theme="twoTone" twoToneColor={color.primary} />}
             title="指定一个房间吧！"
@@ -45,7 +47,9 @@ class App extends React.Component {
                 placeholder="房间号"
                 enterButton
                 style={{ width: '300px' }}
-                onSearch={value => window.location.href = `http://localhost:3000/basic?roomid=${value}`}
+                onSearch={value =>
+                  (window.location.href = `http://localhost:3000/basic?roomid=${value}`)
+                }
               />
             }
           />
@@ -56,16 +60,17 @@ class App extends React.Component {
       <Layout>
         <Header>
           <div style={{ float: 'left', fontSize: '18px', color: '#fff' }}>
-            <Icon type="home" style={{ marginRight: '8px', fontSize: '18px', color: color.primary }} />
+            <Icon
+              type="home"
+              style={{ marginRight: '8px', fontSize: '18px', color: color.primary }}
+            />
             斗鱼弹幕抓取管理中心
           </div>
           <div style={{ float: 'right', fontSize: '16px', color: '#fff' }}>
             <Icon type="github" style={{ marginRight: '6px', fontSize: '16px' }} />
-            <a
-              href="https://github.com/Crawler995/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >Crawler995</a>
+            <a href="https://github.com/Crawler995/" target="_blank" rel="noopener noreferrer">
+              Crawler995
+            </a>
           </div>
         </Header>
 

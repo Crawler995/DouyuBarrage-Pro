@@ -1,21 +1,21 @@
 import React from 'react';
-import { Link, RouteComponentProps, withRouter } from "react-router-dom";
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { Menu, Icon } from 'antd';
 import getRoomId from '../util/getRoomId';
 
 interface IItem {
-  text: string,
-  path: string
+  text: string;
+  path: string;
 }
 
 interface ISubMenu {
-  title: string,
-  iconType: string,
-  items: Array<IItem>
+  title: string;
+  iconType: string;
+  items: Array<IItem>;
 }
 
 interface IMenu {
-  subMenus: Array<ISubMenu>
+  subMenus: Array<ISubMenu>;
 }
 
 const menu: IMenu = {
@@ -44,7 +44,7 @@ const menu: IMenu = {
 
 const getSubMenuKey = (index: number) => `sub${index}`;
 
-const AppMenu: React.SFC<RouteComponentProps> = (props) => {
+const AppMenu: React.SFC<RouteComponentProps> = props => {
   // defaultSelectedKey depends on the url
   let defaultSelectedKey = props.location.pathname.split('/')[1];
   defaultSelectedKey = defaultSelectedKey === '' ? 'basic' : defaultSelectedKey;
@@ -56,29 +56,25 @@ const AppMenu: React.SFC<RouteComponentProps> = (props) => {
       defaultOpenKeys={[0, 1].map(i => getSubMenuKey(i))}
       style={{ height: '100%' }}
     >
-      {
-        menu.subMenus.map((subMenu, subIndex) => 
-          <Menu.SubMenu
-            key={getSubMenuKey(subIndex)}
-            title={
-              <span>
-                <Icon type={subMenu.iconType} />
-                {subMenu.title}
-              </span>
-            }
-          >
-            {
-              subMenu.items.map((item, itemIndex) => 
-                <Menu.Item key={item.path}>
-                  <Link to={`/${item.path}?roomid=${getRoomId()}`}>{item.text}</Link>
-                </Menu.Item>
-              )
-            }
-          </Menu.SubMenu>
-        )
-      }
+      {menu.subMenus.map((subMenu, subIndex) => (
+        <Menu.SubMenu
+          key={getSubMenuKey(subIndex)}
+          title={
+            <span>
+              <Icon type={subMenu.iconType} />
+              {subMenu.title}
+            </span>
+          }
+        >
+          {subMenu.items.map((item, itemIndex) => (
+            <Menu.Item key={item.path}>
+              <Link to={`/${item.path}?roomid=${getRoomId()}`}>{item.text}</Link>
+            </Menu.Item>
+          ))}
+        </Menu.SubMenu>
+      ))}
     </Menu>
   );
-}
+};
 
 export default withRouter(AppMenu);

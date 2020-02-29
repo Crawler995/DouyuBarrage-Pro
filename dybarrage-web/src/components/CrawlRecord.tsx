@@ -5,16 +5,16 @@ import { TableRowSelection, PaginationConfig } from 'antd/lib/table';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
 
 interface IRow {
-  key: string,
-  crawlStartTime: string,
-  crawlStopTime: string,
-  crawlDmNum: number
+  key: string;
+  crawlStartTime: string;
+  crawlStopTime: string;
+  crawlDmNum: number;
 }
 
 interface IState {
-  tableData: Array<IRow>,
-  selectedRowKeys: Array<string>,
-  isGettingTableData: boolean
+  tableData: Array<IRow>;
+  selectedRowKeys: Array<string>;
+  isGettingTableData: boolean;
 }
 
 export default class CrawlRecord extends Component<{}, IState> {
@@ -27,7 +27,7 @@ export default class CrawlRecord extends Component<{}, IState> {
       tableData: [],
       selectedRowKeys: [],
       isGettingTableData: false
-    }
+    };
 
     this.crawlRecordDataTimeRangeStrings = ['', ''];
   }
@@ -42,28 +42,28 @@ export default class CrawlRecord extends Component<{}, IState> {
       0,
       undefined
     )
-    .then(res => {
-      if(res.data.error === 0) {
+      .then(res => {
+        if (res.data.error === 0) {
+          this.setState({
+            tableData: res.data.data.map((item: any) => {
+              return {
+                key: item.id,
+                crawlStartTime: item.start_time,
+                crawlStopTime: item.stop_time,
+                crawlDmNum: item.dm_num
+              };
+            }),
+            isGettingTableData: false
+          });
+        }
+      })
+      .catch(err => {
         this.setState({
-          tableData: res.data.data.map((item: any) => {
-            return {
-              key: item.id,
-              crawlStartTime: item.start_time,
-              crawlStopTime: item.stop_time,
-              crawlDmNum: item.dm_num
-            }
-          }),
           isGettingTableData: false
         });
-      }
-    })
-    .catch(err => {
-      this.setState({
-        isGettingTableData: false
-      })
-      console.log(err);
-    })
-  }
+        console.log(err);
+      });
+  };
 
   componentDidMount() {
     this.getCrawlRecordData();
@@ -76,12 +76,13 @@ export default class CrawlRecord extends Component<{}, IState> {
       <Card style={{ marginBottom: '30px' }}>
         <Form
           layout="inline"
-          onSubmit={(e) => {
+          onSubmit={e => {
             e.preventDefault();
             this.getCrawlRecordData();
-          }}>
+          }}
+        >
           <Form.Item label="日期范围">
-            <DatePicker.RangePicker 
+            <DatePicker.RangePicker
               onChange={(dates, dateStrings) => {
                 this.crawlRecordDataTimeRangeStrings = dateStrings;
               }}
@@ -89,19 +90,21 @@ export default class CrawlRecord extends Component<{}, IState> {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">刷新</Button>
+            <Button type="primary" htmlType="submit">
+              刷新
+            </Button>
           </Form.Item>
         </Form>
       </Card>
-    )
-  }
+    );
+  };
 
   renderTable = () => {
     const columns = [
       {
         title: '抓取开始时间',
         dataIndex: 'crawlStartTime',
-        sorter: (r1: IRow, r2: IRow) => r1.crawlStartTime > r2.crawlStartTime ? 1 : -1
+        sorter: (r1: IRow, r2: IRow) => (r1.crawlStartTime > r2.crawlStartTime ? 1 : -1)
       },
       {
         title: '抓取结束时间',
@@ -122,7 +125,7 @@ export default class CrawlRecord extends Component<{}, IState> {
     const pagination: PaginationConfig = {
       pageSize: 5
     };
-    
+
     return (
       <Table
         rowSelection={rowSelection}
@@ -131,26 +134,27 @@ export default class CrawlRecord extends Component<{}, IState> {
         dataSource={this.state.tableData}
         loading={this.state.isGettingTableData}
       />
-    )
-  }
+    );
+  };
   render() {
     return (
       <div>
         <Typography.Title level={4}>筛选条件</Typography.Title>
-        { this.renderForm() }
+        {this.renderForm()}
 
         <Typography.Title level={4}>抓取记录</Typography.Title>
         <Button
-          type="primary" 
+          type="primary"
           style={{ marginBottom: '10px', marginRight: '10px' }}
           disabled={this.state.selectedRowKeys.length === 0}
-        >下载选中弹幕</Button>
-        <Button
-          type="primary" 
-          style={{ marginBottom: '10px' }}
-        >下载全部弹幕</Button>
-        { this.renderTable() }
+        >
+          下载选中弹幕
+        </Button>
+        <Button type="primary" style={{ marginBottom: '10px' }}>
+          下载全部弹幕
+        </Button>
+        {this.renderTable()}
       </div>
-    )
+    );
   }
 }
