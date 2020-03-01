@@ -58,7 +58,16 @@ const AppMain: React.SFC = () => {
         {noUnmountedWhenRouteChangesRoute('/keywordstat', <KeywordStat />)}
 
         {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
-        {noUnmountedWhenRouteChangesRoute('/dmlevel', <Chart dataEventId="dmlevel_data" />)}
+        {noUnmountedWhenRouteChangesRoute(
+          '/dmlevel',
+          <Chart
+            dataEventId="dmlevel_data"
+            style={{
+              width: '100%',
+              height: 'calc(100vh - 100px)'
+            }}
+          />
+        )}
       </Content>
     </Layout>
   );

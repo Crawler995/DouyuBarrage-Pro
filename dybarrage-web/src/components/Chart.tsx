@@ -5,6 +5,7 @@ import periodlyReceiveMsgTypes from '../network/websocket/msgType/periodlyReceiv
 
 interface IProps {
   dataEventId: periodlyReceiveMsgTypes;
+  style: React.CSSProperties;
 }
 
 interface IState {
@@ -37,12 +38,7 @@ export default class Chart extends Component<IProps, IState> {
 
   render() {
     return (
-      <div
-        style={{
-          width: '100%',
-          height: 'calc(100vh - 130px)'
-        }}
-      >
+      <div style={this.props.style}>
         <ReactEcharts option={this.state.option} style={{ width: '100%', height: '100%' }} />
       </div>
     );
