@@ -6,6 +6,7 @@ interface IProps {
   moveTime: number;
   content: string;
   fontSize: number;
+  opacity: number;
   onDisappear: (ins: HTMLDivElement) => void;
 }
 
@@ -28,6 +29,7 @@ export default class Barrage extends React.Component<IProps, {}> {
           left: `${100 + Math.random() * 10}vw`,
           top: `${this.props.initY}px`,
           fontSize: `${this.props.fontSize}px`,
+          opacity: this.props.opacity,
           animation: `barrage-move ${this.props.moveTime}s linear forwards`
         }}
       >

@@ -10,6 +10,7 @@ import getDmSendVData from './dataget/getDmSendVData';
 import getDmLevelData from './dataget/getDmLevelData';
 import getCurBarrages from './dataget/getCurBarrages';
 import { DATA_SEND_INTERVAL } from '../config';
+import HighlightRecord from '../model/HighlightRecord';
 
 // useful utils of a room socket
 export interface RoomUtil {
@@ -227,6 +228,20 @@ class RoomManager {
     const flag = res[0].flag;
     clearInterval(flag);
     util.intervalFlags = util.intervalFlags.filter(item => item.msgType !== 'cur_dm');
+    this.logger.info('stop send barrages to room ' + util.roomId);
+  };
+
+  public addHighlightRecord = async (socket: Socket) => {
+    const util = this.roomUtilMap.get(socket) as RoomUtil;
+    if (util === undefined) {
+      return;
+    }
+
+    await HighlightRecord.upsert({
+      time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+      room_id: util.roomId
+    });
+    this.logger.info('add highlight in room ' + util.roomId);
   };
 
   public getUtilByRoomId = (roomId: string) => {

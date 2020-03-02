@@ -107,7 +107,6 @@ export default class BarrageWall extends Component<{}, IState> {
 
   stopHandleDmData = () => {
     getWebSocketClient().removeSubscriber('cur_dm');
-    this.removeAllBarrageDom();
   };
 
   removeBarrageDom = (ins: HTMLDivElement) => {
@@ -148,6 +147,7 @@ export default class BarrageWall extends Component<{}, IState> {
       initY: barrageYPos,
       moveTime: this.sliderSettings.get('moveTime')?.value as number,
       fontSize: this.sliderSettings.get('fontSize')?.value as number,
+      opacity: this.sliderSettings.get('opacity')?.value as number,
       onDisappear: this.removeBarrageDom.bind(this)
     });
     const wrapper = document.createElement('div');
@@ -212,7 +212,6 @@ export default class BarrageWall extends Component<{}, IState> {
             left: '0',
             width: '100%',
             height: '100%',
-            opacity: this.sliderSettings.get('opacity')?.value as number,
             pointerEvents: 'none',
             overflow: 'hidden'
           }}

@@ -8,6 +8,7 @@ type singleReceiveMsgTypes =
   | 'delete_keyword'
   | 'request_send_dm'
   | 'stop_send_dm'
+  | 'add_highlight_record'
   | 'disconnect';
 
 export default singleReceiveMsgTypes;

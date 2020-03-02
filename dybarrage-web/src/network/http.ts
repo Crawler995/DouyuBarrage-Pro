@@ -24,3 +24,19 @@ export const getCrawlRecord = (
     }
   });
 };
+
+export const getHighlightRecord = (
+  startTime?: string,
+  stopTime?: string,
+  offset?: number,
+  limit?: number
+) => {
+  return axiosIns.get(`/room/${getRoomId()}/highlightrec?`, {
+    params: {
+      startTime,
+      stopTime,
+      offset,
+      limit
+    }
+  });
+};

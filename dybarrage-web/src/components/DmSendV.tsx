@@ -8,6 +8,9 @@ interface IState {
 }
 
 export default class DmSendV extends Component<{}, IState> {
+  // if dmSendV > thresold
+  // a highlight record will be saved to DB
+  // throttleTime: the highlight record will be throttled
   private highlightCaptureSettings: { thresold: number; throttleTime: number };
   private tempSettings: { thresold: number; throttleTime: number };
   private throttleFlag: any = null;
@@ -19,6 +22,7 @@ export default class DmSendV extends Component<{}, IState> {
       isOpenHighlightCaptured: false
     };
 
+    // default settings
     this.highlightCaptureSettings = {
       thresold: 8,
       throttleTime: 5
@@ -34,18 +38,27 @@ export default class DmSendV extends Component<{}, IState> {
       return;
     }
     const arr = obj.series.data as Array<number>;
+    // last dmSendV
     const curValue = arr[arr.length - 1];
     return curValue > thresold;
   };
 
+  captureHighlight = () => {
+    message.success('捕捉到高光时刻！');
+    // todo
+    // emit server to add a record to db
+    getWebSocketClient().emitEvent('add_highlight_record', '');
+  };
+
   startHandleDmSendVData = () => {
     getWebSocketClient().addSubscriber('dmsendv_data', (data: any) => {
-      if(!this.state.isOpenHighlightCaptured) {
+      if (!this.state.isOpenHighlightCaptured) {
         return;
       }
 
-      if(this.throttleFlag === null && this.isHighlight(data)) {
-        message.success('捕捉到高光时刻！');
+      // throttle function
+      if (this.throttleFlag === null && this.isHighlight(data)) {
+        this.captureHighlight();
         this.throttleFlag = setTimeout(() => {
           clearTimeout(this.throttleFlag);
           this.throttleFlag = null;
@@ -80,9 +93,9 @@ export default class DmSendV extends Component<{}, IState> {
         >
           <Form
             layout="inline"
-            onSubmit={(e) => {
+            onSubmit={e => {
               e.preventDefault();
-              this.highlightCaptureSettings = { ...this.tempSettings }
+              this.highlightCaptureSettings = { ...this.tempSettings };
             }}
           >
             <Row gutter={16}>

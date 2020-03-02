@@ -40,6 +40,7 @@ class WebSocketClient {
     this.ws.close();
   };
 
+  // you can add different subscribers to an event
   public addSubscriber = (
     eventId: singleReceiveMsgTypes | periodlyReceiveMsgTypes,
     notifyFn: (data: any) => void
@@ -47,6 +48,7 @@ class WebSocketClient {
     this.ws.on(eventId, (data: any) => notifyFn(data));
   };
 
+  // this will remove all subscribers on this event
   public removeSubscriber = (eventId: singleReceiveMsgTypes | periodlyReceiveMsgTypes) => {
     this.ws.off(eventId);
   };

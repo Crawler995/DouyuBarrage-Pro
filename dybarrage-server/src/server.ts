@@ -17,6 +17,7 @@ export default class Server {
     const router = new Router();
     router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
     router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
+    router.get('/api/room/:roomId/highlightrec', HttpDataGet.getHighlightRecord);
     app.use(router.routes()).use(router.allowedMethods());
 
     const io = Socket(
@@ -95,6 +96,12 @@ class SocketUtil {
         'stop_send_dm',
         () => {
           RoomManager.stopPeriodlySendBarrages(this.socket);
+        }
+      ],
+      [
+        'add_highlight_record',
+        async () => {
+          await RoomManager.addHighlightRecord(this.socket);
         }
       ]
     ]);

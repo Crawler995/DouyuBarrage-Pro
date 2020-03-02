@@ -10,6 +10,7 @@ import KeywordStat from './KeywordStat';
 import Chart from './Chart';
 import DmSendV from './DmSendV';
 import BarrageWall from './BarrageWall';
+import HighlightRecord from './HighlightRecord';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -56,6 +57,7 @@ const AppMain: React.SFC = () => {
         {noUnmountedWhenRouteChangesRoute('/basic', <BasicStat />)}
         {noUnmountedWhenRouteChangesRoute('/crawlrec', <CrawlRecord />)}
         {noUnmountedWhenRouteChangesRoute('/keywordstat', <KeywordStat />)}
+        {noUnmountedWhenRouteChangesRoute('/highlightrec', <HighlightRecord />)}
 
         {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
         {noUnmountedWhenRouteChangesRoute(

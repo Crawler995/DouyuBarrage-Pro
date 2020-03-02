@@ -1,40 +1,38 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
-import CrawlRecord from '../../model/CrawlRecord';
+import HighlightRecord from '../../model/HighlightRecord';
 import { Op } from 'sequelize';
 
 export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>) => {
   const roomId = ctx.params.roomId;
   const { startTime, stopTime, limit, offset } = ctx.request.query;
 
+  let timeRange = {};
+  let hasTimeRange = false;
+  if (startTime !== undefined) {
+    timeRange = {
+      [Op.gte]: startTime
+    };
+    hasTimeRange = true;
+  }
+  if (stopTime !== undefined) {
+    timeRange = {
+      ...timeRange,
+      [Op.lte]: stopTime
+    };
+    hasTimeRange = true;
+  }
   let where = {
     room_id: roomId
   };
-  if (startTime !== undefined) {
-    where = {
-      ...where,
-      ...{
-        start_time: {
-          [Op.gte]: startTime
-        }
-      }
-    };
-  }
-  if (stopTime !== undefined) {
-    where = {
-      ...where,
-      ...{
-        stop_time: {
-          [Op.lte]: stopTime
-        }
-      }
-    };
+  if (hasTimeRange) {
+    where = { ...where, ...{ time: timeRange } };
   }
 
   try {
-    const res = await CrawlRecord.findAll({
+    const res = await HighlightRecord.findAll({
       where,
-      order: [['start_time', 'desc']],
+      order: [['time', 'desc']],
       limit: limit ? parseInt(limit) : undefined,
       offset: offset ? parseInt(offset) : undefined
     });
