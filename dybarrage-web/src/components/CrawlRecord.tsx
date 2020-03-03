@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Card, DatePicker, Form, Table, Typography, Button } from 'antd';
-import { getCrawlRecord } from '../network/http';
+import { Card, DatePicker, Form, Table, Typography, Button, Row, Col, Divider } from 'antd';
+import { getCrawlRecord, downloadBarragesByCrawlRecord } from '../network/http';
 import { TableRowSelection, PaginationConfig } from 'antd/lib/table';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
+import BarrageDownloadCheckBox, {barragesFileDefaultColumns} from './BarrageDownloadCheckBox';
+import downloadFile from '../util/downloadFile';
 
 interface IRow {
   key: string;
@@ -13,14 +15,15 @@ interface IRow {
 
 interface IState {
   tableData: Array<IRow>;
-  selectedRowKeys: Array<string>;
+  selectedRowKeys: Array<number>;
   pagination: PaginationConfig;
   isGettingTableData: boolean;
 }
 
 export default class CrawlRecord extends Component<{}, IState> {
   private crawlRecordDataTimeRangeStrings: Array<string>;
-  private crawlRecordPageSize = 5;
+  private downloadBarrageColumns: Array<string> = barragesFileDefaultColumns;
+  private crawlRecordPageSize = 8;
 
   constructor(props: any) {
     super(props);
@@ -91,9 +94,10 @@ export default class CrawlRecord extends Component<{}, IState> {
     getWebSocketClient().addConnectSuccessHook(() => this.getCrawlRecordData());
   }
 
-  renderForm = () => {
+  renderFilterForm = () => {
     return (
-      <Card style={{ marginBottom: '30px' }}>
+      <div>
+        <Typography.Title level={4}>筛选条件</Typography.Title>
         <Form
           layout="inline"
           onSubmit={e => {
@@ -115,9 +119,66 @@ export default class CrawlRecord extends Component<{}, IState> {
             </Button>
           </Form.Item>
         </Form>
-      </Card>
+      </div>
     );
   };
+
+  downloadBarrages = (downloadSelectedBarrages: boolean) => {
+    downloadBarragesByCrawlRecord(
+      this.downloadBarrageColumns,
+      downloadSelectedBarrages ? this.state.selectedRowKeys : []
+    )
+    .then(res => {
+      downloadFile(res.data, 'barrages.csv');
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  }
+
+  renderDownloadForm = () => {
+    return (
+      <div>
+        <Typography.Title level={4}>下载弹幕（CSV格式）</Typography.Title>
+        <Form>
+          <Form.Item label="选择CSV包含的列">
+            <BarrageDownloadCheckBox
+              onChange={(checkedValue) => this.downloadBarrageColumns = checkedValue as Array<string>}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              style={{ marginBottom: '10px', marginRight: '10px' }}
+              disabled={this.state.selectedRowKeys.length === 0}
+              onClick={() => this.downloadBarrages(true)}
+            >
+              下载选中弹幕
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button 
+              type="primary" 
+              style={{ marginBottom: '10px' }}
+              onClick={() => this.downloadBarrages(false)}
+            >
+              下载全部弹幕
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    );
+  }
+
+  renderForm = () => {
+    return(
+      <Card>
+        {this.renderFilterForm()}
+        <Divider />
+        {this.renderDownloadForm()}
+      </Card>
+    );
+  }
 
   renderTable = () => {
     const columns = [
@@ -156,21 +217,15 @@ export default class CrawlRecord extends Component<{}, IState> {
   render() {
     return (
       <div>
-        <Typography.Title level={4}>筛选条件</Typography.Title>
-        {this.renderForm()}
-
-        <Typography.Title level={4}>抓取记录</Typography.Title>
-        <Button
-          type="primary"
-          style={{ marginBottom: '10px', marginRight: '10px' }}
-          disabled={this.state.selectedRowKeys.length === 0}
-        >
-          下载选中弹幕
-        </Button>
-        <Button type="primary" style={{ marginBottom: '10px' }}>
-          下载全部弹幕
-        </Button>
-        {this.renderTable()}
+        <Row gutter={32}>
+          <Col span={12}>
+            {this.renderForm()}
+          </Col>
+          <Col span={12}>
+            <Typography.Title level={4}>抓取记录</Typography.Title>
+            {this.renderTable()}
+          </Col>
+        </Row>
       </div>
     );
   }

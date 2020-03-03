@@ -50,7 +50,7 @@ const AppMain: React.SFC = () => {
       <Content
         style={{
           padding: '30px',
-          minHeight: `${window.innerHeight - 64}px`,
+          minHeight: `${window.innerHeight - 66}px`,
           background: '#fff'
         }}
       >
@@ -66,7 +66,7 @@ const AppMain: React.SFC = () => {
             dataEventId="dmlevel_data"
             style={{
               width: '100%',
-              height: 'calc(100vh - 100px)'
+              height: 'calc(100vh - 140px)'
             }}
           />
         )}

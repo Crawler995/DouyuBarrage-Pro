@@ -1,5 +1,6 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
+import * as bodyParser from 'koa-body';
 import * as Socket from 'socket.io';
 import * as process from 'process';
 import RoomManager from './websocket/RoomManager';
@@ -17,8 +18,11 @@ export default class Server {
     const router = new Router();
     router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
     router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
+    router.post('/api/room/:roomId/crawlrec/dmdownload', HttpDataGet.getBarrageByCrawlRecord);
     router.get('/api/room/:roomId/highlightrec', HttpDataGet.getHighlightRecord);
-    app.use(router.routes()).use(router.allowedMethods());
+    router.post('/api/room/:roomId/highlightrec/dmdownload', HttpDataGet.getBarrageByHighlightRecord);
+    app.use(bodyParser({multipart: true}));
+    app.use(router.routes());
 
     const io = Socket(
       app.listen(3001, () => {

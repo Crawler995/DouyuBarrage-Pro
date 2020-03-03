@@ -40,3 +40,29 @@ export const getHighlightRecord = (
     }
   });
 };
+
+export const downloadBarragesByCrawlRecord = (
+  columns: Array<string>,
+  crawlRecordIds?: Array<number>,
+) => {
+  return axiosIns.post(`/room/${getRoomId()}/crawlrec/dmdownload`, {
+    columns,
+    crawlRecordIds
+  }, {
+    responseType: 'blob'
+  });
+};
+
+export const downloadBarragesByHighlightRecord = (
+  columns: Array<string>,
+  afterTime: number,
+  highlightRecordIds?: Array<number>
+) => {
+  return axiosIns.post(`/room/${getRoomId()}/highlightrec/dmdownload`, {
+    columns,
+    highlightRecordIds,
+    afterTime
+  }, {
+    responseType: 'blob'
+  });
+};

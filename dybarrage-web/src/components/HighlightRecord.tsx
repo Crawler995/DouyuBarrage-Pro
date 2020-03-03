@@ -11,9 +11,11 @@ import {
   InputNumber,
   Divider
 } from 'antd';
-import { getHighlightRecord } from '../network/http';
+import { getHighlightRecord, downloadBarragesByHighlightRecord } from '../network/http';
 import { PaginationConfig, TableRowSelection } from 'antd/lib/table';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
+import BarrageDownloadCheckBox, {barragesFileDefaultColumns} from './BarrageDownloadCheckBox';
+import downloadFile from '../util/downloadFile';
 
 interface IRow {
   key: string;
@@ -23,13 +25,14 @@ interface IRow {
 interface IState {
   tableData: Array<IRow>;
   pagination: PaginationConfig;
-  selectedRowKeys: Array<string>;
+  selectedRowKeys: Array<number>;
   isGettingTableData: boolean;
 }
 
 export default class HighlightRecord extends Component<{}, IState> {
   private highlightRecordDataTimeRangeStrings: Array<string> = ['', ''];
-  private DownloadDmSecondsAfterHighlight: number = 20;
+  private downloadBarrageColumns: Array<string> = barragesFileDefaultColumns;
+  private downloadDmSecondsAfterHighlight: number = 20;
   private highlightRecordPageSize: number = 8;
 
   constructor(props: any) {
@@ -97,6 +100,20 @@ export default class HighlightRecord extends Component<{}, IState> {
     getWebSocketClient().addConnectSuccessHook(() => this.getHighlightRecordData());
   }
 
+  downloadBarrages = (downloadSelectedBarrages: boolean) => {
+    downloadBarragesByHighlightRecord(
+      this.downloadBarrageColumns, 
+      this.downloadDmSecondsAfterHighlight, 
+      downloadSelectedBarrages ? this.state.selectedRowKeys : []
+    )
+    .then(res => {
+      downloadFile(res.data, 'highlight_barrages.csv');
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  }
+
   renderForm = () => {
     return (
       <Card>
@@ -125,22 +142,38 @@ export default class HighlightRecord extends Component<{}, IState> {
 
         <Divider />
 
-        <Typography.Title level={4}>下载高光时刻弹幕</Typography.Title>
+        <Typography.Title level={4}>下载高光时刻弹幕（CSV格式）</Typography.Title>
         <Form>
           <Form.Item label="下载高光时刻开始至多少秒后的弹幕">
-            <InputNumber defaultValue={this.DownloadDmSecondsAfterHighlight} />
+            <InputNumber
+              defaultValue={this.downloadDmSecondsAfterHighlight}
+              onChange={(value) => {
+                if(value !== undefined) {
+                  this.downloadDmSecondsAfterHighlight = value;
+                }
+              }} />
+          </Form.Item>
+          <Form.Item label="选择CSV包含的列">
+            <BarrageDownloadCheckBox
+              onChange={(checkedValue) => this.downloadBarrageColumns = checkedValue as Array<string>}
+            />
           </Form.Item>
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               disabled={this.state.selectedRowKeys.length === 0}
+              onClick={() => this.downloadBarrages(true)}
             >
               下载选中高光时刻弹幕
             </Button>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button
+              type="primary"
+              htmlType="submit"
+              onClick={() => this.downloadBarrages(false)}
+            >
               下载全部高光时刻弹幕
             </Button>
           </Form.Item>
