@@ -14,11 +14,13 @@ interface IRow {
 interface IState {
   tableData: Array<IRow>;
   selectedRowKeys: Array<string>;
+  pagination: PaginationConfig;
   isGettingTableData: boolean;
 }
 
 export default class CrawlRecord extends Component<{}, IState> {
   private crawlRecordDataTimeRangeStrings: Array<string>;
+  private crawlRecordPageSize = 5;
 
   constructor(props: any) {
     super(props);
@@ -26,24 +28,41 @@ export default class CrawlRecord extends Component<{}, IState> {
     this.state = {
       tableData: [],
       selectedRowKeys: [],
+      pagination: {
+        pageSize: this.crawlRecordPageSize
+      },
       isGettingTableData: false
     };
 
     this.crawlRecordDataTimeRangeStrings = ['', ''];
   }
 
-  getCrawlRecordData = () => {
+  handleTableChange = (pagination: PaginationConfig) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+
+    if (typeof pagination.current === 'number') {
+      this.getCrawlRecordData((pagination.current - 1) * this.crawlRecordPageSize);
+    }
+  };
+
+  getCrawlRecordData = (offset: number = 0, limit: number = this.crawlRecordPageSize) => {
     this.setState({ isGettingTableData: true });
     const dateRange = this.crawlRecordDataTimeRangeStrings;
 
     getCrawlRecord(
       dateRange[0] === '' ? undefined : dateRange[0],
       dateRange[1] === '' ? undefined : dateRange[1],
-      0,
-      undefined
+      offset,
+      limit
     )
       .then(res => {
         if (res.data.error === 0) {
+          const pagination = { ...this.state.pagination };
+          pagination.total = res.data.total;
           this.setState({
             tableData: res.data.data.map((item: any) => {
               return {
@@ -53,7 +72,8 @@ export default class CrawlRecord extends Component<{}, IState> {
                 crawlDmNum: item.dm_num
               };
             }),
-            isGettingTableData: false
+            isGettingTableData: false,
+            pagination
           });
         }
       })
@@ -122,17 +142,14 @@ export default class CrawlRecord extends Component<{}, IState> {
       onChange: (selectedRowKeys: any) => this.setState({ selectedRowKeys })
     };
 
-    const pagination: PaginationConfig = {
-      pageSize: 5
-    };
-
     return (
       <Table
         rowSelection={rowSelection}
-        pagination={pagination}
+        pagination={this.state.pagination}
         columns={columns}
         dataSource={this.state.tableData}
         loading={this.state.isGettingTableData}
+        onChange={this.handleTableChange}
       />
     );
   };

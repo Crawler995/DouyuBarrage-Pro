@@ -30,7 +30,7 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
   }
 
   try {
-    const res = await HighlightRecord.findAll({
+    const res = await HighlightRecord.findAndCountAll({
       where,
       order: [['time', 'desc']],
       limit: limit ? parseInt(limit) : undefined,
@@ -39,7 +39,8 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
 
     ctx.body = {
       error: 0,
-      data: res
+      data: res.rows,
+      total: res.count
     };
   } catch (error) {
     ctx.body = {
