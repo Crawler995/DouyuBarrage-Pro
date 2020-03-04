@@ -20,8 +20,12 @@ export default class Server {
     router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
     router.post('/api/room/:roomId/crawlrec/dmdownload', HttpDataGet.getBarrageByCrawlRecord);
     router.get('/api/room/:roomId/highlightrec', HttpDataGet.getHighlightRecord);
-    router.post('/api/room/:roomId/highlightrec/dmdownload', HttpDataGet.getBarrageByHighlightRecord);
-    app.use(bodyParser({multipart: true}));
+    router.post(
+      '/api/room/:roomId/highlightrec/dmdownload',
+      HttpDataGet.getBarrageByHighlightRecord
+    );
+    router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
+    app.use(bodyParser({ multipart: true }));
     app.use(router.routes());
 
     const io = Socket(

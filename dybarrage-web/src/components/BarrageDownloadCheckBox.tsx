@@ -1,5 +1,5 @@
 import React from 'react';
-import {Checkbox} from 'antd';
+import { Checkbox } from 'antd';
 import { CheckboxValueType, CheckboxOptionType } from 'antd/lib/checkbox/Group';
 
 const options: CheckboxOptionType[] = [
@@ -14,11 +14,11 @@ const options: CheckboxOptionType[] = [
   { label: '徽章等级', value: 'badge_level' }
 ];
 
-export const barragesFileDefaultColumns: string[] = [
-  'time', 'sender_name', 'dm_content'
-];
+export const barragesFileDefaultColumns: string[] = ['time', 'sender_name', 'dm_content'];
 
-export default function BarrageDownloadCheckBox(props: {onChange: (checkedValue: CheckboxValueType[]) => void}) {
+export default function BarrageDownloadCheckBox(props: {
+  onChange: (checkedValue: CheckboxValueType[]) => void;
+}) {
   return (
     <Checkbox.Group
       options={options}
@@ -27,5 +27,3 @@ export default function BarrageDownloadCheckBox(props: {onChange: (checkedValue:
     />
   );
 }
-
-

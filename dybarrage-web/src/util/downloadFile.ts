@@ -10,4 +10,4 @@ export default (data: any, fileName: string) => {
   element.click();
   document.body.removeChild(element);
   window.URL.revokeObjectURL(href);
-}
+};

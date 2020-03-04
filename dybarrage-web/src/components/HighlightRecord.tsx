@@ -14,7 +14,7 @@ import {
 import { getHighlightRecord, downloadBarragesByHighlightRecord } from '../network/http';
 import { PaginationConfig, TableRowSelection } from 'antd/lib/table';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
-import BarrageDownloadCheckBox, {barragesFileDefaultColumns} from './BarrageDownloadCheckBox';
+import BarrageDownloadCheckBox, { barragesFileDefaultColumns } from './BarrageDownloadCheckBox';
 import downloadFile from '../util/downloadFile';
 
 interface IRow {
@@ -102,17 +102,17 @@ export default class HighlightRecord extends Component<{}, IState> {
 
   downloadBarrages = (downloadSelectedBarrages: boolean) => {
     downloadBarragesByHighlightRecord(
-      this.downloadBarrageColumns, 
-      this.downloadDmSecondsAfterHighlight, 
+      this.downloadBarrageColumns,
+      this.downloadDmSecondsAfterHighlight,
       downloadSelectedBarrages ? this.state.selectedRowKeys : []
     )
-    .then(res => {
-      downloadFile(res.data, 'highlight_barrages.csv');
-    })
-    .catch(err => {
-      console.log(err);
-    });
-  }
+      .then(res => {
+        downloadFile(res.data, 'highlight_barrages.csv');
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
   renderForm = () => {
     return (
@@ -147,15 +147,18 @@ export default class HighlightRecord extends Component<{}, IState> {
           <Form.Item label="下载高光时刻开始至多少秒后的弹幕">
             <InputNumber
               defaultValue={this.downloadDmSecondsAfterHighlight}
-              onChange={(value) => {
-                if(value !== undefined) {
+              onChange={value => {
+                if (value !== undefined) {
                   this.downloadDmSecondsAfterHighlight = value;
                 }
-              }} />
+              }}
+            />
           </Form.Item>
           <Form.Item label="选择CSV包含的列">
             <BarrageDownloadCheckBox
-              onChange={(checkedValue) => this.downloadBarrageColumns = checkedValue as Array<string>}
+              onChange={checkedValue =>
+                (this.downloadBarrageColumns = checkedValue as Array<string>)
+              }
             />
           </Form.Item>
           <Form.Item>
@@ -169,11 +172,7 @@ export default class HighlightRecord extends Component<{}, IState> {
             </Button>
           </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              onClick={() => this.downloadBarrages(false)}
-            >
+            <Button type="primary" htmlType="submit" onClick={() => this.downloadBarrages(false)}>
               下载全部高光时刻弹幕
             </Button>
           </Form.Item>

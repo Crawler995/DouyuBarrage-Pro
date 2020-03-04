@@ -3,7 +3,7 @@ import { Card, DatePicker, Form, Table, Typography, Button, Row, Col, Divider } 
 import { getCrawlRecord, downloadBarragesByCrawlRecord } from '../network/http';
 import { TableRowSelection, PaginationConfig } from 'antd/lib/table';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
-import BarrageDownloadCheckBox, {barragesFileDefaultColumns} from './BarrageDownloadCheckBox';
+import BarrageDownloadCheckBox, { barragesFileDefaultColumns } from './BarrageDownloadCheckBox';
 import downloadFile from '../util/downloadFile';
 
 interface IRow {
@@ -128,13 +128,13 @@ export default class CrawlRecord extends Component<{}, IState> {
       this.downloadBarrageColumns,
       downloadSelectedBarrages ? this.state.selectedRowKeys : []
     )
-    .then(res => {
-      downloadFile(res.data, 'barrages.csv');
-    })
-    .catch(err => {
-      console.log(err);
-    });
-  }
+      .then(res => {
+        downloadFile(res.data, 'barrages.csv');
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
   renderDownloadForm = () => {
     return (
@@ -143,7 +143,9 @@ export default class CrawlRecord extends Component<{}, IState> {
         <Form>
           <Form.Item label="选择CSV包含的列">
             <BarrageDownloadCheckBox
-              onChange={(checkedValue) => this.downloadBarrageColumns = checkedValue as Array<string>}
+              onChange={checkedValue =>
+                (this.downloadBarrageColumns = checkedValue as Array<string>)
+              }
             />
           </Form.Item>
           <Form.Item>
@@ -157,8 +159,8 @@ export default class CrawlRecord extends Component<{}, IState> {
             </Button>
           </Form.Item>
           <Form.Item>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               style={{ marginBottom: '10px' }}
               onClick={() => this.downloadBarrages(false)}
             >
@@ -168,17 +170,17 @@ export default class CrawlRecord extends Component<{}, IState> {
         </Form>
       </div>
     );
-  }
+  };
 
   renderForm = () => {
-    return(
+    return (
       <Card>
         {this.renderFilterForm()}
         <Divider />
         {this.renderDownloadForm()}
       </Card>
     );
-  }
+  };
 
   renderTable = () => {
     const columns = [
@@ -218,9 +220,7 @@ export default class CrawlRecord extends Component<{}, IState> {
     return (
       <div>
         <Row gutter={32}>
-          <Col span={12}>
-            {this.renderForm()}
-          </Col>
+          <Col span={12}>{this.renderForm()}</Col>
           <Col span={12}>
             <Typography.Title level={4}>抓取记录</Typography.Title>
             {this.renderTable()}

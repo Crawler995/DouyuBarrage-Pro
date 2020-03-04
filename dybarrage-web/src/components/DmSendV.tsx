@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Chart from './Chart';
+import WSChart from './WSChart';
 import { Card, Form, Switch, Row, Col, Button, message, InputNumber } from 'antd';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
 
@@ -78,7 +78,7 @@ export default class DmSendV extends Component<{}, IState> {
     return (
       <div>
         <Card>
-          <Chart
+          <WSChart
             dataEventId="dmsendv_data"
             style={{
               width: '100%',

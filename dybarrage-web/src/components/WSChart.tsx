@@ -12,7 +12,7 @@ interface IState {
   option: ObjectMap;
 }
 
-export default class Chart extends Component<IProps, IState> {
+export default class WSChart extends Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 

@@ -7,10 +7,11 @@ import BasicStat from './BasicStat';
 import CrawlRecord from './CrawlRecord';
 import getRoomId from '../util/getRoomId';
 import KeywordStat from './KeywordStat';
-import Chart from './Chart';
+import WSChart from './WSChart';
 import DmSendV from './DmSendV';
 import BarrageWall from './BarrageWall';
 import HighlightRecord from './HighlightRecord';
+import BarrageWordClound from './BarrageWordClound';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -62,7 +63,7 @@ const AppMain: React.SFC = () => {
         {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
         {noUnmountedWhenRouteChangesRoute(
           '/dmlevel',
-          <Chart
+          <WSChart
             dataEventId="dmlevel_data"
             style={{
               width: '100%',
@@ -70,6 +71,7 @@ const AppMain: React.SFC = () => {
             }}
           />
         )}
+        {noUnmountedWhenRouteChangesRoute('/dmcloud', <BarrageWordClound />)}
       </Content>
     </Layout>
   );

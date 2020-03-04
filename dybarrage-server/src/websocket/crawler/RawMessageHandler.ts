@@ -1,3 +1,5 @@
+import log4js from '../../logger';
+
 // Douyu Barrage Raw Message Handler
 // detail
 // https://zhuanlan.zhihu.com/p/106697646
@@ -44,18 +46,27 @@ export default class RawMessageHandler {
 
   // Douyu protocol packet -> barrage info string array
   // a packet may contain several barrage info
+
+  // someone reported a bug:
+  // when readInt32LE() it will raise ERR_OUT_OF_BOUNEDS error
+  // I don't know why, so try...catch it...
   private static decode = (buf: Buffer): Array<string> => {
-    let pos = 0;
-    let msg: Array<string> = [];
+    try {
+      let pos = 0;
+      let msg: Array<string> = [];
 
-    while (pos < buf.length) {
-      const contentLen = buf.slice(pos, pos + 4).readInt32LE(0);
-      const content = buf.slice(pos + 12, pos + 3 + contentLen).toString();
-      msg.push(content);
-      pos += contentLen + 4;
+      while (pos < buf.length) {
+        const contentLen = buf.slice(pos, pos + 4).readInt32LE(0);
+        const content = buf.slice(pos + 12, pos + 3 + contentLen).toString();
+        msg.push(content);
+        pos += contentLen + 4;
+      }
+
+      return msg;
+    } catch (error) {
+      log4js.getLogger('RawMessageHandler').error('decode error: ' + error);
+      return [];
     }
-
-    return msg;
   };
 
   private static parseDecodeMsg = (decodeMsg: string): any => {

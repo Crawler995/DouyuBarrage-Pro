@@ -43,14 +43,18 @@ export const getHighlightRecord = (
 
 export const downloadBarragesByCrawlRecord = (
   columns: Array<string>,
-  crawlRecordIds?: Array<number>,
+  crawlRecordIds?: Array<number>
 ) => {
-  return axiosIns.post(`/room/${getRoomId()}/crawlrec/dmdownload`, {
-    columns,
-    crawlRecordIds
-  }, {
-    responseType: 'blob'
-  });
+  return axiosIns.post(
+    `/room/${getRoomId()}/crawlrec/dmdownload`,
+    {
+      columns,
+      crawlRecordIds
+    },
+    {
+      responseType: 'blob'
+    }
+  );
 };
 
 export const downloadBarragesByHighlightRecord = (
@@ -58,11 +62,19 @@ export const downloadBarragesByHighlightRecord = (
   afterTime: number,
   highlightRecordIds?: Array<number>
 ) => {
-  return axiosIns.post(`/room/${getRoomId()}/highlightrec/dmdownload`, {
-    columns,
-    highlightRecordIds,
-    afterTime
-  }, {
-    responseType: 'blob'
-  });
+  return axiosIns.post(
+    `/room/${getRoomId()}/highlightrec/dmdownload`,
+    {
+      columns,
+      highlightRecordIds,
+      afterTime
+    },
+    {
+      responseType: 'blob'
+    }
+  );
+};
+
+export const getWordFrequency = () => {
+  return axiosIns.get(`/room/${getRoomId()}/wordcloud`);
 };
