@@ -36,6 +36,14 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
   }
 
   const sortedRes = res.filter(item => item.name.length > 1).sort((a, b) => b.value - a.value);
+  if(sortedRes.length === 0) {
+    ctx.body = {
+      error: 0,
+      data: []
+    };
+    return;
+  }
+  
   const resMaxLen = 100;
   const thresold =
     sortedRes.length > resMaxLen

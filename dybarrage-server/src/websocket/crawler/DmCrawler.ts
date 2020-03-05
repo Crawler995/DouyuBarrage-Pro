@@ -4,6 +4,7 @@ import Barrage from '../../model/Barrage';
 import * as moment from 'moment';
 import RoomManager from '../RoomManager';
 import log4js from '../../logger';
+import { DATA_SEND_INTERVAL } from '../../config';
 
 // Douyu Barrage Crawler
 // detail
@@ -41,6 +42,7 @@ class DmCrawler {
       this.logger.info(`room ${roomId} start crawling successfully`);
       // start to send heartbeat to Douyu server
       const heartbeatInterval = this.prepareReceiveDm(crawlerWs, roomId);
+
       this.crawlerWSUtilMap.set(roomId, {
         ws: crawlerWs,
         heartbeatInterval
@@ -48,23 +50,26 @@ class DmCrawler {
     };
 
     crawlerWs.onmessage = (ev: WebSocket.MessageEvent) => {
+      const util = this.crawlerWSUtilMap.get(roomId);
+      // receive message after room removed
+      if(util === undefined) {
+        return;
+      }
+      // const tempBarrages = util.tempBarrages;
       const buf: Buffer = ev.data as Buffer;
       // convert Buffer to parsed and readable msg obj
       const msgsObj = RawMessageHandler.getMsgsObj(buf);
-      msgsObj.forEach(msgObj => {
-        // insert Barrage to database
-        Barrage.upsert({
-          id: msgObj.cid,
-          time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-          room_id: msgObj.rid,
-          sender_name: msgObj.nn,
-          sender_level: parseInt(msgObj.level),
-          sender_avatar_url: msgObj.ic,
-          dm_content: msgObj.txt,
-          badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
-          badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
-        });
-      });
+      Barrage.bulkCreate(msgsObj.map(msgObj => ({
+        id: msgObj.cid,
+        time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+        room_id: msgObj.rid,
+        sender_name: msgObj.nn,
+        sender_level: parseInt(msgObj.level),
+        sender_avatar_url: msgObj.ic,
+        dm_content: msgObj.txt,
+        badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
+        badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
+      })));
     };
   };
 
@@ -77,6 +82,7 @@ class DmCrawler {
     util.ws.send(RawMessageHandler.encode('type@=logout/'));
     util.ws.close();
     clearInterval(util.heartbeatInterval);
+    // clearInterval(util.insertBarragesToDBInterval);
     this.crawlerWSUtilMap.delete(roomId);
 
     this.logger.info(`room ${roomId} stop crawling successfully`);
