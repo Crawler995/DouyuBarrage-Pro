@@ -5,7 +5,7 @@ import { Button } from 'antd';
 import { getWordFrequency } from '../network/http';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
 
-export default class BarrageWordClound extends Component {
+export default class BarrageWordCloud extends Component {
   private chartIns: echarts.ECharts | null = null;
 
   componentDidMount() {
@@ -58,12 +58,12 @@ export default class BarrageWordClound extends Component {
     return (
       <div
         style={{
-          width: 'calc(100% - 200px)'
+          width: 'calc(100vw - 200px)'
         }}
       >
         <Button onClick={() => this.getWordFrequency()}>刷新</Button>
 
-        <div id="barrage-word-cloud" style={{ height: 'calc(100vh - 200px)' }} />
+        <div id="barrage-word-cloud" style={{ width: 'calc(100vw - 300px)', height: 'calc(100vh - 200px)' }} />
       </div>
     );
   }

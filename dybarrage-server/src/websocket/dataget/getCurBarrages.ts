@@ -4,16 +4,8 @@ import * as moment from 'moment';
 import { Op } from 'sequelize';
 import { DATA_SEND_INTERVAL } from '../../config';
 
-export default async (util: RoomUtil): Promise<string> => {
-  const res = await Barrage.findAll({
-    attributes: ['dm_content'],
-    where: {
-      room_id: util.roomId,
-      time: {
-        [Op.gte]: moment(Date.now() - DATA_SEND_INTERVAL).format('YYYY-MM-DD HH:mm:ss')
-      }
-    }
-  });
-
-  return JSON.stringify(res);
+export default (util: RoomUtil) => {
+  const res = JSON.stringify(util.lastBarrages.map(item => item.dm_content));
+  util.lastBarrages.length = 0;
+  return res;
 };

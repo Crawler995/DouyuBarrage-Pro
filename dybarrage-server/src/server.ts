@@ -15,16 +15,10 @@ export default class Server {
     this.catchException();
 
     const app = new Koa();
-    const router = new Router();
-    router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
-    router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
-    router.post('/api/room/:roomId/crawlrec/dmdownload', HttpDataGet.getBarrageByCrawlRecord);
-    router.get('/api/room/:roomId/highlightrec', HttpDataGet.getHighlightRecord);
-    router.post(
-      '/api/room/:roomId/highlightrec/dmdownload',
-      HttpDataGet.getBarrageByHighlightRecord
-    );
-    router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
+    const router = new Router(); 
+
+    this.addRouter(router);
+    
     app.use(bodyParser({ multipart: true }));
     app.use(router.routes());
 
@@ -39,6 +33,18 @@ export default class Server {
     });
   };
 
+  private addRouter = (router: Router) => {
+    router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
+    router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
+    router.post('/api/room/:roomId/crawlrec/dmdownload', HttpDataGet.getBarrageByCrawlRecord);
+    router.get('/api/room/:roomId/highlightrec', HttpDataGet.getHighlightRecord);
+    router.post(
+      '/api/room/:roomId/highlightrec/dmdownload',
+      HttpDataGet.getBarrageByHighlightRecord
+    );
+    router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
+  }
+
   private catchException = () => {
     process.on('SIGINT', async () => {
       await RoomManager.removeAllRoom();
@@ -52,7 +58,8 @@ class SocketUtil {
   // receive a message, do the specific function
   private singleReceiveMsgFnMap: Map<singleReceiveMsgTypes, (...args: any[]) => void>;
   private socket: Socket.Socket;
-
+  private logger = log4js.getLogger('SocketUtil');
+  
   public constructor(socket: Socket.Socket) {
     this.socket = socket;
     // if you want to handle a new type of message from the client
@@ -90,7 +97,8 @@ class SocketUtil {
       ],
       [
         'disconnect',
-        async () => {
+        async (reason: string) => {
+          this.logger.error('disconnect: ' + reason);
           await RoomManager.removeRoom(this.socket);
         }
       ],

@@ -2,7 +2,7 @@ import * as WebSocket from 'ws';
 import RawMessageHandler from './RawMessageHandler';
 import Barrage from '../../model/Barrage';
 import * as moment from 'moment';
-import RoomManager from '../RoomManager';
+import RoomManager, { RoomUtil } from '../RoomManager';
 import log4js from '../../logger';
 import { DATA_SEND_INTERVAL } from '../../config';
 
@@ -17,18 +17,18 @@ interface WSUtil {
 }
 
 class DmCrawler {
-  private crawlerWSUtilMap: Map<string, WSUtil>;
+  private crawlerWSUtilMap: Map<RoomUtil, WSUtil>;
   private logger = log4js.getLogger('DmCrawler');
 
   public constructor() {
-    this.crawlerWSUtilMap = new Map<string, WSUtil>();
+    this.crawlerWSUtilMap = new Map<RoomUtil, WSUtil>();
   }
 
-  public addCrawler = (roomId: string) => {
+  public addCrawler = (roomUtil: RoomUtil) => {
     const crawlerWs = new WebSocket('wss://danmuproxy.douyu.com:8506/');
 
     crawlerWs.onerror = ev => {
-      const socket = RoomManager.getSocketByRoomId(roomId);
+      const socket = RoomManager.getSocketByRoomId(roomUtil.roomId);
       this.logger.error('crawler error: ' + ev.message);
       if (socket === undefined) {
         return;
@@ -39,18 +39,18 @@ class DmCrawler {
     };
 
     crawlerWs.onopen = () => {
-      this.logger.info(`room ${roomId} start crawling successfully`);
+      this.logger.info(`room ${roomUtil.roomId} start crawling successfully`);
       // start to send heartbeat to Douyu server
-      const heartbeatInterval = this.prepareReceiveDm(crawlerWs, roomId);
+      const heartbeatInterval = this.prepareReceiveDm(crawlerWs, roomUtil.roomId);
 
-      this.crawlerWSUtilMap.set(roomId, {
+      this.crawlerWSUtilMap.set(roomUtil, {
         ws: crawlerWs,
         heartbeatInterval
       });
     };
 
     crawlerWs.onmessage = (ev: WebSocket.MessageEvent) => {
-      const util = this.crawlerWSUtilMap.get(roomId);
+      const util = this.crawlerWSUtilMap.get(roomUtil);
       // receive message after room removed
       if(util === undefined) {
         return;
@@ -58,23 +58,30 @@ class DmCrawler {
       // const tempBarrages = util.tempBarrages;
       const buf: Buffer = ev.data as Buffer;
       // convert Buffer to parsed and readable msg obj
-      const msgsObj = RawMessageHandler.getMsgsObj(buf);
-      Barrage.bulkCreate(msgsObj.map(msgObj => ({
-        id: msgObj.cid,
-        time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-        room_id: msgObj.rid,
-        sender_name: msgObj.nn,
-        sender_level: parseInt(msgObj.level),
-        sender_avatar_url: msgObj.ic,
-        dm_content: msgObj.txt,
-        badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
-        badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
-      })));
+      const barragesInfo = RawMessageHandler.getBarragesInfo(buf);
+      Barrage.bulkCreate(barragesInfo);
+
+      roomUtil.crawlBasicStat.thisCrawlDmNum += barragesInfo.length;
+      // keyword count
+      roomUtil.countKeywords.forEach((value, keyword) => {
+        barragesInfo.forEach(barrage => {
+          if(barrage.dm_content.includes(keyword)) {
+            roomUtil.countKeywords.set(keyword, {
+              thisNum: value.thisNum + 1,
+              totalNum: value.totalNum + 1
+            });
+          }
+        });
+      });
+      // last barrages
+      if(roomUtil.isRequestedSendingBarrages) {
+        roomUtil.lastBarrages.push(...barragesInfo);
+      }
     };
   };
 
-  public removeCrawler = (roomId: string) => {
-    const util = this.crawlerWSUtilMap.get(roomId);
+  public removeCrawler = (roomUtil: RoomUtil) => {
+    const util = this.crawlerWSUtilMap.get(roomUtil);
     // util will be removed before if error occured when crawling
     if (util === undefined) {
       return;
@@ -83,9 +90,9 @@ class DmCrawler {
     util.ws.close();
     clearInterval(util.heartbeatInterval);
     // clearInterval(util.insertBarragesToDBInterval);
-    this.crawlerWSUtilMap.delete(roomId);
+    this.crawlerWSUtilMap.delete(roomUtil);
 
-    this.logger.info(`room ${roomId} stop crawling successfully`);
+    this.logger.info(`room ${roomUtil.roomId} stop crawling successfully`);
   };
 
   // login and join group

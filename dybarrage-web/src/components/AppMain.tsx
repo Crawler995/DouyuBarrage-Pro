@@ -7,11 +7,10 @@ import BasicStat from './BasicStat';
 import CrawlRecord from './CrawlRecord';
 import getRoomId from '../util/getRoomId';
 import KeywordStat from './KeywordStat';
-import WSChart from './WSChart';
 import DmSendV from './DmSendV';
 import BarrageWall from './BarrageWall';
 import HighlightRecord from './HighlightRecord';
-import BarrageWordClound from './BarrageWordClound';
+import BarrageWordCloud from './BarrageWordCloud';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -61,7 +60,7 @@ const AppMain: React.SFC = () => {
         {noUnmountedWhenRouteChangesRoute('/highlightrec', <HighlightRecord />)}
 
         {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
-        {noUnmountedWhenRouteChangesRoute(
+        {/* {noUnmountedWhenRouteChangesRoute(
           '/dmlevel',
           <WSChart
             dataEventId="dmlevel_data"
@@ -70,8 +69,8 @@ const AppMain: React.SFC = () => {
               height: 'calc(100vh - 140px)'
             }}
           />
-        )}
-        {noUnmountedWhenRouteChangesRoute('/dmcloud', <BarrageWordClound />)}
+        )} */}
+        {noUnmountedWhenRouteChangesRoute('/dmcloud', <BarrageWordCloud />)}
       </Content>
     </Layout>
   );

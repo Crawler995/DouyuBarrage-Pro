@@ -143,7 +143,7 @@ export default class BarrageWall extends Component<{}, IState> {
 
     // add new barrage to the container
     const newBarrageElement = React.createElement(Barrage, {
-      content: item.dm_content,
+      content: item,
       initY: barrageYPos,
       moveTime: this.sliderSettings.get('moveTime')?.value as number,
       fontSize: this.sliderSettings.get('fontSize')?.value as number,

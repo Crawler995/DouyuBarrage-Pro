@@ -1,4 +1,6 @@
 import log4js from '../../logger';
+import { getNowString } from '../../util';
+import { BarrageInfo } from './BarrageInfo';
 
 // Douyu Barrage Raw Message Handler
 // detail
@@ -30,7 +32,23 @@ export default class RawMessageHandler {
     return resBytes;
   };
 
-  public static getMsgsObj = (buf: Buffer): Array<any> => {
+  public static getBarragesInfo = (buf: Buffer): Array<BarrageInfo> => {
+    return RawMessageHandler.getMsgsObj(buf).map(msgObj => (
+      {
+        id: msgObj.cid,
+        time: getNowString(),
+        room_id: msgObj.rid,
+        sender_name: msgObj.nn,
+        sender_level: parseInt(msgObj.level),
+        sender_avatar_url: msgObj.ic,
+        dm_content: msgObj.txt,
+        badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
+        badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
+      }
+    ));
+  }
+
+  private static getMsgsObj = (buf: Buffer): Array<any> => {
     const decodeMsgs = RawMessageHandler.decode(buf);
     const res: Array<any> = [];
 
@@ -58,7 +76,13 @@ export default class RawMessageHandler {
 
     try {
       while (pos < buf.length) {
+        if(pos > buf.length) {
+          throw new Error('pos > buf.length');
+        }
         const contentLen = buf.slice(pos, pos + 4).readInt32LE(0);
+        if(contentLen < 0) {
+          throw new Error('contentLen < 0');
+        }
         const content = buf.slice(pos + 12, pos + 3 + contentLen).toString();
         msg.push(content);
         pos += contentLen + 4;

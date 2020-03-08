@@ -4,6 +4,7 @@ import getWebSocketClient from '../network/websocket/WebSocketClient';
 import periodlyReceiveMsgTypes from '../network/websocket/msgType/periodlyReceiveMsgTypes';
 
 interface IProps {
+  initOption: ObjectMap;
   dataEventId: periodlyReceiveMsgTypes;
   style: React.CSSProperties;
 }
@@ -17,7 +18,7 @@ export default class WSChart extends Component<IProps, IState> {
     super(props);
 
     this.state = {
-      option: {}
+      option: props.initOption
     };
   }
 

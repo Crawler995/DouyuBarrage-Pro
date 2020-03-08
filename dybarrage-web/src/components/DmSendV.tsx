@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import WSChart from './WSChart';
 import { Card, Form, Switch, Row, Col, Button, message, InputNumber } from 'antd';
 import getWebSocketClient from '../network/websocket/WebSocketClient';
+import color from '../uiconfig/color';
+import ReactEcharts, { ObjectMap } from 'echarts-for-react';
 
 interface IState {
   isOpenHighlightCaptured: boolean;
+  chartOption: ObjectMap;
 }
 
 export default class DmSendV extends Component<{}, IState> {
@@ -15,11 +17,54 @@ export default class DmSendV extends Component<{}, IState> {
   private tempSettings: { thresold: number; throttleTime: number };
   private throttleFlag: any = null;
 
+  private xData = Array(120).fill('00:00:00');
+  private yData = Array(120).fill(0);
+
   constructor(props: {}) {
     super(props);
 
     this.state = {
-      isOpenHighlightCaptured: false
+      isOpenHighlightCaptured: false,
+      chartOption: {
+        title: {
+          text: '实时弹幕发送速度',
+          x: 'center'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: color.primary
+            }
+          },
+          formatter: `{b} 速度{c}条/s`
+        },
+        xAxis: {
+          name: '时间',
+          type: 'category',
+          data: this.xData,
+          boundaryGap: true,
+          axisTick: {
+            alignWithLabel: true,
+            interval: 10
+          },
+          axisLabel: {
+            interval: 10
+          }
+        },
+        yAxis: {
+          name: '弹幕发送速度',
+          type: 'value'
+        },
+        series: {
+          type: 'line',
+          lineStyle: {
+            color: color.primary
+          },
+          symbol: 'none'
+        }
+      }
     };
 
     // default settings
@@ -31,15 +76,11 @@ export default class DmSendV extends Component<{}, IState> {
     this.tempSettings = { ...this.highlightCaptureSettings };
   }
 
-  isHighlight = (data: any) => {
+  isHighlight = (obj: any) => {
     const { thresold } = this.highlightCaptureSettings;
-    const obj = JSON.parse(data);
-    if (obj.series.data === undefined) {
-      return;
-    }
-    const arr = obj.series.data as Array<number>;
+
     // last dmSendV
-    const curValue = arr[arr.length - 1];
+    const curValue = obj.dmv;
     return curValue > thresold;
   };
 
@@ -52,12 +93,30 @@ export default class DmSendV extends Component<{}, IState> {
 
   startHandleDmSendVData = () => {
     getWebSocketClient().addSubscriber('dmsendv_data', (data: any) => {
+      const obj = JSON.parse(data);
+
+      this.xData.shift();
+      this.xData.push(obj.now);
+      this.yData.shift();
+      this.yData.push(obj.dmv);
+
+      this.setState({
+        chartOption: {
+          series: {
+            data: [...this.yData]
+          },
+          xAxis: {
+            data: [...this.xData]
+          }
+        }
+      });
+
       if (!this.state.isOpenHighlightCaptured) {
         return;
       }
 
       // throttle function
-      if (this.throttleFlag === null && this.isHighlight(data)) {
+      if (this.throttleFlag === null && this.isHighlight(obj)) {
         this.captureHighlight();
         this.throttleFlag = setTimeout(() => {
           clearTimeout(this.throttleFlag);
@@ -78,13 +137,16 @@ export default class DmSendV extends Component<{}, IState> {
     return (
       <div>
         <Card>
-          <WSChart
-            dataEventId="dmsendv_data"
-            style={{
-              width: '100%',
-              height: '50vh'
-            }}
-          />
+          <div style={{
+            width: '100%',
+            height: '50vh'
+          }}>
+            <ReactEcharts
+              option={this.state.chartOption}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+
         </Card>
         <Card
           style={{

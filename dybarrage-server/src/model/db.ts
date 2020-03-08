@@ -6,9 +6,10 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
   host: dbconfig.host,
   dialect: 'mysql',
   pool: {
-    max: 10,
+    max: 20,
     min: 0,
-    idle: 10000
+    idle: 10000,
+    acquire: 30000
   },
   logging: false,
   dialectOptions: {

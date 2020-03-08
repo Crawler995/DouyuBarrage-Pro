@@ -4,29 +4,45 @@ import CrawlRecord from '../model/CrawlRecord';
 import * as moment from 'moment';
 import DmCrawler from './crawler/DmCrawler';
 import singleSendMsgTypes from './msgtype/singleSendMsgTypes';
-import { getCrawlBasicStat, getKeywordStat } from './dataget';
 import log4js from '../logger';
-import getDmSendVData from './dataget/getDmSendVData';
-import getDmLevelData from './dataget/getDmLevelData';
+// import getDmSendVData from './dataget/getDmSendVData';
+// import getDmLevelData from './dataget/getDmLevelData';e
 import getCurBarrages from './dataget/getCurBarrages';
 import { DATA_SEND_INTERVAL } from '../config';
 import HighlightRecord from '../model/HighlightRecord';
+import { getNowString } from '../util';
+import { getPastTotalCrawlTime, getPastTotalCrawlDmNum, getCrawlBasicStat } from './dataget/getCrawlBasicStat';
+import { getKeywordTotalNum, getKeywordThisNum, getKeywordStat } from './dataget/getKeywordStat';
+import { getDmSendVData } from './dataget/getDmSendVData';
+import { BarrageInfo } from './crawler/BarrageInfo';
 
 // useful utils of a room socket
 export interface RoomUtil {
   roomId: string;
   // flags of setInterval() (for sending data periodly)
   intervalFlags: Array<{ msgType: string; flag: any }>;
-  startCrawlTime: string;
-  crawlDmNum: number;
-  dmKeywords: Array<string>;
+
+  crawlBasicStat: {
+    // second
+    pastTotalCrawlTime: number;
+    pastTotalCrawlDmNum: number;
+    startCrawlTime: Date | null;
+    thisCrawlDmNum: number;
+  };
+
+  countKeywords: Map<string, {
+    totalNum: number;
+    thisNum: number;
+  }>;
+  
   // real-time data
   // barrage sending velocity
   dmSendV: {
     lastCrawlDmNum: number;
-    yData: Array<number>;
-    xData: Array<string>;
   };
+
+  isRequestedSendingBarrages: boolean;
+  lastBarrages: Array<BarrageInfo>;
 }
 
 class RoomManager {
@@ -47,11 +63,11 @@ class RoomManager {
   public startPeriodlyEmitClient = (
     socket: Socket,
     msgType: periodlySendMsgType,
-    dataFn: (util: RoomUtil) => Promise<string>
+    dataFn: (util: RoomUtil) => string
   ) => {
     const util = this.roomUtilMap.get(socket) as RoomUtil;
-    const flag = setInterval(async () => {
-      socket.emit(msgType, await dataFn(util));
+    const flag = setInterval(() => {
+      socket.emit(msgType, dataFn(util));
     }, this.DATA_SEND_INTERVAL);
     util.intervalFlags.push({ msgType, flag });
   };
@@ -88,14 +104,25 @@ class RoomManager {
     const util: RoomUtil = {
       roomId,
       intervalFlags: [],
-      startCrawlTime: '',
-      crawlDmNum: 0,
-      dmKeywords: [],
+
+      crawlBasicStat: {
+        startCrawlTime: null,
+        pastTotalCrawlTime: await getPastTotalCrawlTime(roomId),
+        thisCrawlDmNum: 0,
+        pastTotalCrawlDmNum: await getPastTotalCrawlDmNum(roomId)
+      },
+      
+      countKeywords: new Map<string, {
+        totalNum: number;
+        thisNum: number;
+      }>(),
+
       dmSendV: {
-        xData: [],
-        yData: [],
         lastCrawlDmNum: 0
-      }
+      },
+
+      isRequestedSendingBarrages: false,
+      lastBarrages: []
     };
     this.roomUtilMap.set(socket, util);
 
@@ -103,9 +130,9 @@ class RoomManager {
     // for client init UI
     this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
-    this.singleEmitClient(socket, 'dmsendv_data', getDmSendVData.getStyle());
-    this.singleEmitClient(socket, 'dmlevel_data', getDmLevelData.getStyle());
-    this.singleEmitClient(socket, 'dmlevel_data', await getDmLevelData.getSeries(util));
+    // this.singleEmitClient(socket, 'dmsendv_data', getDmSendVData.getStyle());
+    // this.singleEmitClient(socket, 'dmlevel_data', getDmLevelData.getStyle());
+    // this.singleEmitClient(socket, 'dmlevel_data', await getDmLevelData.getSeries(util));
 
     this.logger.info('add room ' + roomId);
   };
@@ -121,7 +148,7 @@ class RoomManager {
     }
     // if started crawling before
     // stop it
-    if (util.startCrawlTime !== '') {
+    if (util.crawlBasicStat.startCrawlTime !== null) {
       await this.stopRoomCrawlProcess(socket);
     }
     this.roomUtilMap.delete(socket);
@@ -138,39 +165,41 @@ class RoomManager {
       return;
     }
 
-    DmCrawler.addCrawler(util.roomId);
-    util.startCrawlTime = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    DmCrawler.addCrawler(util);
+    util.crawlBasicStat.startCrawlTime = new Date();
 
     this.singleEmitClient(socket, 'start_crawl_success');
     // start periodly sending real-time data
     this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat);
     this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat);
-    this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData.getSeries);
-    this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries);
+    this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData);
+    // this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries);
   };
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
     const util = this.roomUtilMap.get(socket);
     // same as above
-    if (util === undefined || util.startCrawlTime === '') {
+    if (util === undefined || util.crawlBasicStat.startCrawlTime === null) {
       this.logger.error('try to stop crawling before starting crawling');
       this.singleEmitClient(socket, 'stop_crawl_failed', '还未开始抓取');
       return;
     }
 
-    DmCrawler.removeCrawler(util.roomId);
+    DmCrawler.removeCrawler(util);
     // insert a crawl record to database
     await CrawlRecord.upsert({
-      start_time: util.startCrawlTime,
+      start_time: util.crawlBasicStat.startCrawlTime,
       stop_time: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
       room_id: util.roomId,
-      dm_num: util.crawlDmNum
+      dm_num: util.crawlBasicStat.thisCrawlDmNum
     });
-    util.startCrawlTime = '';
-    util.crawlDmNum = 0;
+    
+    util.crawlBasicStat.pastTotalCrawlDmNum += util.crawlBasicStat.thisCrawlDmNum;
+    util.crawlBasicStat.pastTotalCrawlTime += 
+      Math.floor((Date.now() - util.crawlBasicStat.startCrawlTime?.getTime()) / 1000);
+    util.crawlBasicStat.thisCrawlDmNum = 0;
+    util.crawlBasicStat.startCrawlTime = null;
     util.dmSendV = {
-      xData: [],
-      yData: [],
       lastCrawlDmNum: 0
     };
     // stop sending data periodly
@@ -187,7 +216,11 @@ class RoomManager {
       return;
     }
 
-    util.dmKeywords.push(keyword);
+    const startCrawlTime = util.crawlBasicStat.startCrawlTime;
+    util.countKeywords.set(keyword, {
+      totalNum: await getKeywordTotalNum(util.roomId, keyword), //todo
+      thisNum: await getKeywordThisNum(util.roomId, keyword, startCrawlTime) // todo
+    }); // todo
     this.singleEmitClient(socket, 'add_keyword_success');
     // when user add a keyword, the server should send the data once for client to update UI
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
@@ -203,15 +236,21 @@ class RoomManager {
       return;
     }
 
-    util.dmKeywords = util.dmKeywords.filter(item => item !== keyword);
+    util.countKeywords.delete(keyword);
     this.singleEmitClient(socket, 'delete_keyword_success');
     // when user delete a keyword, the server should send the data once for client to update UI
-    this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
+    this.singleEmitClient(socket, 'keyword_stat', getKeywordStat(util));
 
     this.logger.info('delete keyword ' + keyword);
   };
 
   public startPeriodlySendBarrages = (socket: Socket) => {
+    const util = this.roomUtilMap.get(socket);
+    if(util === undefined) {
+      return;
+    }
+
+    util.isRequestedSendingBarrages = true;
     this.startPeriodlyEmitClient(socket, 'cur_dm', getCurBarrages);
     this.logger.info('start send barrages to room ' + this.roomUtilMap.get(socket)?.roomId);
   };
@@ -221,6 +260,8 @@ class RoomManager {
     if (util === undefined) {
       return;
     }
+    util.isRequestedSendingBarrages = false;
+    
     const res = util.intervalFlags.filter(item => item.msgType === 'cur_dm');
     if (res.length === 0) {
       return;

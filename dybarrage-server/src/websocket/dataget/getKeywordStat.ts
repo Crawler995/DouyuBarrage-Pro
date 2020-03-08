@@ -9,48 +9,51 @@ interface IMatchRes {
   thisCrawlMatchNum: number;
 }
 
-export default async (util: RoomUtil) => {
-  const { roomId, dmKeywords, startCrawlTime } = util;
+export const getKeywordTotalNum = async (roomId: string, keyword: string) => {
+  return await (
+    await Barrage.findAndCountAll({
+      where: {
+        room_id: roomId,
+        dm_content: {
+          [Op.substring]: keyword
+        }
+      }
+    })
+  ).count;
+}
+
+export const getKeywordThisNum = async (roomId: string, keyword: string, startCrawlTime: Date | null) => {
+  if(startCrawlTime === null) {
+    return 0;
+  }
+
+  return await (
+    await Barrage.findAndCountAll({
+      where: {
+        room_id: roomId,
+        dm_content: {
+          [Op.substring]: keyword
+        },
+        time: {
+          [Op.gte]: startCrawlTime
+        }
+      }
+    })
+  ).count;
+}
+
+export const getKeywordStat = (util: RoomUtil) => {
+  const {countKeywords} = util;
   const res: Array<IMatchRes> = [];
 
-  for (const keyword of dmKeywords) {
-    const totalMatchKeywordCount = await (
-      await Barrage.findAndCountAll({
-        where: {
-          room_id: roomId,
-          dm_content: {
-            [Op.substring]: keyword
-          }
-        }
-      })
-    ).count;
-
-    let thisMatchKeywordCount;
-    if (startCrawlTime === '') {
-      thisMatchKeywordCount = 0;
-    } else {
-      thisMatchKeywordCount = await (
-        await Barrage.findAndCountAll({
-          where: {
-            room_id: roomId,
-            dm_content: {
-              [Op.substring]: keyword
-            },
-            time: {
-              [Op.gte]: startCrawlTime
-            }
-          }
-        })
-      ).count;
-    }
-
+  countKeywords.forEach((value, key) => {
     res.push({
-      key: keyword,
-      keyword,
-      totalMatchNum: totalMatchKeywordCount,
-      thisCrawlMatchNum: thisMatchKeywordCount
+      key,
+      keyword: key,
+      totalMatchNum: value.totalNum,
+      thisCrawlMatchNum: value.thisNum
     });
-  }
+  });
 
   return JSON.stringify(res);
 };
