@@ -1,21 +1,12 @@
-import React, { Component } from 'react';
-import ReactEcharts, { ObjectMap } from 'echarts-for-react';
-import color from '../uiconfig/color';
+import React from 'react';
+import ManuallyRefreshChart from './ManuallyRefreshChart';
 import { getDmLevelData } from '../network/http';
-import { Button } from 'antd';
+import color from '../uiconfig/color';
 
-interface IState {
-  option: ObjectMap;
-  chartLoading: boolean;
-}
-
-export default class DmLevel extends Component<{}, IState> {
-  constructor(props: {}) {
-    super(props);
-
-    this.state = {
-      chartLoading: false,
-      option: {
+export default function DmLevel() {
+  return (
+    <ManuallyRefreshChart
+      initOption={{
         title: {
           text: '弹幕发送用户等级分布',
           x: 'center'
@@ -67,47 +58,8 @@ export default class DmLevel extends Component<{}, IState> {
             }
           }
         ]
-      }
-    };
-  }
-
-  getDmLevelData = () => {
-    this.setState({ chartLoading: true });
-    getDmLevelData()
-      .then(res => {
-        if (res.data.error === 0) {
-          const data = res.data.data;
-          console.log(data);
-          this.setState({
-            option: data
-          });
-        }
-        this.setState({ chartLoading: false });
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({ chartLoading: false });
-      });
-  };
-
-  render() {
-    return (
-      <div
-        style={{
-          width: '100%',
-          height: 'calc(100vh - 160px)'
-        }}
-      >
-        <Button onClick={() => this.getDmLevelData()}>刷新</Button>
-        <ReactEcharts
-          showLoading={this.state.chartLoading}
-          option={this.state.option}
-          style={{
-            width: '100%',
-            height: 'calc(100vh - 160px)'
-          }}
-        />
-      </div>
-    );
-  }
+      }}
+      dataFn={getDmLevelData}
+    />
+  );
 }

@@ -5,6 +5,7 @@ import getHighlightRecord from './getHighlightRecord';
 import getBarrageByHighlightRecord from './getBarrageByHighlightRecord';
 import getWordFrequency from './getWordFrequency';
 import getDmLevelData from './getDmLevelData';
+import getFans from './getFans';
 
 export {
   getCrawlRecord,
@@ -13,5 +14,6 @@ export {
   getHighlightRecord,
   getBarrageByHighlightRecord,
   getWordFrequency,
-  getDmLevelData
+  getDmLevelData,
+  getFans
 };

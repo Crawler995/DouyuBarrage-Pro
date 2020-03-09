@@ -8,7 +8,7 @@
     "watch-server": "cross-env nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/entry.ts",
     "lint": "eslint ./src/**",
     "format": "prettier --config .prettierrc --write ./src/**/*.ts",
-    "precommit": "npm lint && npm format"
+    "precommit": "npm run lint && npm run format"
   },
   "author": "Crawler995",
   "license": "MIT",

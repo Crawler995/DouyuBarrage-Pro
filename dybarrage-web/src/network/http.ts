@@ -82,3 +82,7 @@ export const getWordFrequency = () => {
 export const getDmLevelData = () => {
   return axiosIns.get(`/room/${getRoomId()}/dmlevel`);
 };
+
+export const getFansData = () => {
+  return axiosIns.get(`/room/${getRoomId()}/fans`);
+};

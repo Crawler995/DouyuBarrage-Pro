@@ -82,10 +82,10 @@ export default class RawMessageHandler {
 
     try {
       while (pos < buf.length) {
-        if (pos > buf.length) {
-          throw new Error('pos > buf.length');
-        }
         const contentLen = buf.slice(pos, pos + 4).readInt32LE(0);
+        if (contentLen !== buf.slice(pos + 4, pos + 8).readInt32LE(0)) {
+          throw new Error('raw data is wrong');
+        }
         if (contentLen < 0) {
           throw new Error('contentLen < 0');
         }

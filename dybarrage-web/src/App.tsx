@@ -58,12 +58,14 @@ class App extends React.Component {
     }
     return (
       <Layout>
-        <Header style={{
-          position: 'relative',
-          zIndex: 10,
-          backgroundColor: '#fff',
-          boxShadow: '0 2px 8px #f0f1f2'
-        }}>
+        <Header
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px #f0f1f2'
+          }}
+        >
           <div style={{ float: 'left', fontSize: '18px', color: '#000' }}>
             <Icon
               type="home"

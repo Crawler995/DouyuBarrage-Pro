@@ -43,6 +43,7 @@ export default class Server {
       HttpDataGet.getBarrageByHighlightRecord
     );
     router.get('/api/room/:roomId/dmlevel', HttpDataGet.getDmLevelData);
+    router.get('/api/room/:roomId/fans', HttpDataGet.getFans);
     router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
   };
 

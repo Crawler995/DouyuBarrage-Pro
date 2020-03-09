@@ -33,7 +33,7 @@
   "scripts": {
     "start": "react-app-rewired start",
     "format": "prettier --config .prettierrc --write ./src/**/*.{ts,tsx}",
-    "precommit": "npm format",
+    "precommit": "npm run format",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"

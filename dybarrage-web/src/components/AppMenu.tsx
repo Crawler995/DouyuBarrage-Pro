@@ -27,8 +27,7 @@ const menu: IMenu = {
         { text: '概览', path: 'basic' },
         { text: '抓取记录及弹幕下载', path: 'crawlrec' },
         { text: '高光时刻统计及弹幕下载', path: 'highlightrec' },
-        { text: '关键词统计', path: 'keywordstat' },
-        { text: '铁粉统计', path: 'fansstat' }
+        { text: '关键词统计', path: 'keywordstat' }
       ]
     },
     {
@@ -37,6 +36,7 @@ const menu: IMenu = {
       items: [
         { text: '实时弹幕发送速度', path: 'dmsendv' },
         { text: '用户等级与发送弹幕数', path: 'dmlevel' },
+        { text: '铁粉统计', path: 'fanstat' },
         { text: '弹幕词云', path: 'dmcloud' }
       ]
     }
