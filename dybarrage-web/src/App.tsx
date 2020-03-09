@@ -58,15 +58,20 @@ class App extends React.Component {
     }
     return (
       <Layout>
-        <Header>
-          <div style={{ float: 'left', fontSize: '18px', color: '#fff' }}>
+        <Header style={{
+          position: 'relative',
+          zIndex: 10,
+          backgroundColor: '#fff',
+          boxShadow: '0 2px 8px #f0f1f2'
+        }}>
+          <div style={{ float: 'left', fontSize: '18px', color: '#000' }}>
             <Icon
               type="home"
               style={{ marginRight: '8px', fontSize: '18px', color: color.primary }}
             />
             斗鱼弹幕抓取管理中心
           </div>
-          <div style={{ float: 'right', fontSize: '16px', color: '#fff' }}>
+          <div style={{ float: 'right', fontSize: '16px', color: '#000' }}>
             <Icon type="github" style={{ marginRight: '6px', fontSize: '16px' }} />
             <a href="https://github.com/Crawler995/" target="_blank" rel="noopener noreferrer">
               Crawler995

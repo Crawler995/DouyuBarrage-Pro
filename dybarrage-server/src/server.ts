@@ -15,10 +15,10 @@ export default class Server {
     this.catchException();
 
     const app = new Koa();
-    const router = new Router(); 
+    const router = new Router();
 
     this.addRouter(router);
-    
+
     app.use(bodyParser({ multipart: true }));
     app.use(router.routes());
 
@@ -44,7 +44,7 @@ export default class Server {
     );
     router.get('/api/room/:roomId/dmlevel', HttpDataGet.getDmLevelData);
     router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
-  }
+  };
 
   private catchException = () => {
     process.on('SIGINT', async () => {
@@ -60,7 +60,7 @@ class SocketUtil {
   private singleReceiveMsgFnMap: Map<singleReceiveMsgTypes, (...args: any[]) => void>;
   private socket: Socket.Socket;
   private logger = log4js.getLogger('SocketUtil');
-  
+
   public constructor(socket: Socket.Socket) {
     this.socket = socket;
     // if you want to handle a new type of message from the client
@@ -99,7 +99,7 @@ class SocketUtil {
       [
         'disconnect',
         async (reason: string) => {
-          this.logger.error('disconnect: ' + reason);
+          this.logger.info('disconnect: ' + reason);
           await RoomManager.removeRoom(this.socket);
         }
       ],

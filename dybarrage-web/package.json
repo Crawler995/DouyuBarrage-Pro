@@ -33,6 +33,7 @@
   "scripts": {
     "start": "react-app-rewired start",
     "format": "prettier --config .prettierrc --write ./src/**/*.{ts,tsx}",
+    "precommit": "npm format",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
@@ -54,6 +55,7 @@
   },
   "proxy": "http://localhost:3001",
   "devDependencies": {
+    "husky": "^4.2.3",
     "prettier": "^1.19.1"
   }
 }

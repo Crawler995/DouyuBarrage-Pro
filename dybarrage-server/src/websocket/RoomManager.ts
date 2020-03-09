@@ -8,7 +8,11 @@ import log4js from '../logger';
 import getCurBarrages from './dataget/getCurBarrages';
 import { DATA_SEND_INTERVAL } from '../config';
 import HighlightRecord from '../model/HighlightRecord';
-import { getPastTotalCrawlTime, getPastTotalCrawlDmNum, getCrawlBasicStat } from './dataget/getCrawlBasicStat';
+import {
+  getPastTotalCrawlTime,
+  getPastTotalCrawlDmNum,
+  getCrawlBasicStat
+} from './dataget/getCrawlBasicStat';
 import { getKeywordTotalNum, getKeywordThisNum, getKeywordStat } from './dataget/getKeywordStat';
 import { getDmSendVData } from './dataget/getDmSendVData';
 import { BarrageInfo } from './crawler/BarrageInfo';
@@ -27,11 +31,14 @@ export interface RoomUtil {
     thisCrawlDmNum: number;
   };
 
-  countKeywords: Map<string, {
-    totalNum: number;
-    thisNum: number;
-  }>;
-  
+  countKeywords: Map<
+    string,
+    {
+      totalNum: number;
+      thisNum: number;
+    }
+  >;
+
   // real-time data
   // barrage sending velocity
   dmSendV: {
@@ -108,11 +115,14 @@ class RoomManager {
         thisCrawlDmNum: 0,
         pastTotalCrawlDmNum: await getPastTotalCrawlDmNum(roomId)
       },
-      
-      countKeywords: new Map<string, {
-        totalNum: number;
-        thisNum: number;
-      }>(),
+
+      countKeywords: new Map<
+        string,
+        {
+          totalNum: number;
+          thisNum: number;
+        }
+      >(),
 
       dmSendV: {
         lastCrawlDmNum: 0
@@ -186,10 +196,11 @@ class RoomManager {
       room_id: util.roomId,
       dm_num: util.crawlBasicStat.thisCrawlDmNum
     });
-    
+
     util.crawlBasicStat.pastTotalCrawlDmNum += util.crawlBasicStat.thisCrawlDmNum;
-    util.crawlBasicStat.pastTotalCrawlTime += 
-      Math.floor((Date.now() - util.crawlBasicStat.startCrawlTime?.getTime()) / 1000);
+    util.crawlBasicStat.pastTotalCrawlTime += Math.floor(
+      (Date.now() - util.crawlBasicStat.startCrawlTime?.getTime()) / 1000
+    );
     util.crawlBasicStat.thisCrawlDmNum = 0;
     util.crawlBasicStat.startCrawlTime = null;
     util.dmSendV = {
@@ -239,7 +250,7 @@ class RoomManager {
 
   public startPeriodlySendBarrages = (socket: Socket) => {
     const util = this.roomUtilMap.get(socket);
-    if(util === undefined) {
+    if (util === undefined) {
       return;
     }
 
@@ -254,7 +265,7 @@ class RoomManager {
       return;
     }
     util.isRequestedSendingBarrages = false;
-    
+
     const res = util.intervalFlags.filter(item => item.msgType === 'cur_dm');
     if (res.length === 0) {
       return;

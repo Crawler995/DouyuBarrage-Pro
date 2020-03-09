@@ -52,7 +52,7 @@ class DmCrawler {
     crawlerWs.onmessage = (ev: WebSocket.MessageEvent) => {
       const util = this.crawlerWSUtilMap.get(roomUtil);
       // receive message after room removed
-      if(util === undefined) {
+      if (util === undefined) {
         return;
       }
       // const tempBarrages = util.tempBarrages;
@@ -60,15 +60,16 @@ class DmCrawler {
       // convert Buffer to parsed and readable msg obj
       const barragesInfo = RawMessageHandler.getBarragesInfo(buf);
       Barrage.bulkCreate(barragesInfo)
-      .then().catch(err => {
-        this.logger.error('insert barrages error: ' + err);
-      });
+        .then()
+        .catch(err => {
+          this.logger.error('insert barrages error: ' + err);
+        });
 
       roomUtil.crawlBasicStat.thisCrawlDmNum += barragesInfo.length;
       // keyword count
       roomUtil.countKeywords.forEach((value, keyword) => {
         barragesInfo.forEach(barrage => {
-          if(barrage.dm_content.includes(keyword)) {
+          if (barrage.dm_content.includes(keyword)) {
             roomUtil.countKeywords.set(keyword, {
               thisNum: value.thisNum + 1,
               totalNum: value.totalNum + 1
@@ -77,7 +78,7 @@ class DmCrawler {
         });
       });
       // last barrages
-      if(roomUtil.isRequestedSendingBarrages) {
+      if (roomUtil.isRequestedSendingBarrages) {
         roomUtil.lastBarrages.push(...barragesInfo);
       }
     };

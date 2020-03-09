@@ -20,10 +20,14 @@ export const getKeywordTotalNum = async (roomId: string, keyword: string) => {
       }
     })
   ).count;
-}
+};
 
-export const getKeywordThisNum = async (roomId: string, keyword: string, startCrawlTime: Date | null) => {
-  if(startCrawlTime === null) {
+export const getKeywordThisNum = async (
+  roomId: string,
+  keyword: string,
+  startCrawlTime: Date | null
+) => {
+  if (startCrawlTime === null) {
     return 0;
   }
 
@@ -40,10 +44,10 @@ export const getKeywordThisNum = async (roomId: string, keyword: string, startCr
       }
     })
   ).count;
-}
+};
 
 export const getKeywordStat = (util: RoomUtil) => {
-  const {countKeywords} = util;
+  const { countKeywords } = util;
   const res: Array<IMatchRes> = [];
 
   countKeywords.forEach((value, key) => {

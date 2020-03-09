@@ -63,7 +63,10 @@ export default class BarrageWordCloud extends Component {
       >
         <Button onClick={() => this.getWordFrequency()}>刷新</Button>
 
-        <div id="barrage-word-cloud" style={{ width: 'calc(100vw - 300px)', height: 'calc(100vh - 200px)' }} />
+        <div
+          id="barrage-word-cloud"
+          style={{ width: 'calc(100vw - 300px)', height: 'calc(100vh - 200px)' }}
+        />
       </div>
     );
   }

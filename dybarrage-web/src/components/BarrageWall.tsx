@@ -187,6 +187,7 @@ export default class BarrageWall extends Component<{}, IState> {
     return (
       <React.Fragment>
         <Dropdown.Button
+          type="primary"
           disabled={!this.state.canStart}
           style={{
             position: 'fixed',

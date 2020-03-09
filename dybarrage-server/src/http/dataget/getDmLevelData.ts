@@ -16,7 +16,9 @@ const getDataFromDB = async (roomId: string) =>
     order: [['sender_level', 'ASC']]
   });
 
-const getDmLevelData = async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>) => {
+const getDmLevelData = async (
+  ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>
+) => {
   const roomId = ctx.params.roomId;
   const res = await getDataFromDB(roomId);
 

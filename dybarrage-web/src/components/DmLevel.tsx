@@ -68,44 +68,46 @@ export default class DmLevel extends Component<{}, IState> {
           }
         ]
       }
-    }
+    };
   }
 
   getDmLevelData = () => {
     this.setState({ chartLoading: true });
     getDmLevelData()
-    .then(res => {
-      if(res.data.error === 0) {
-        const data = res.data.data;
-        console.log(data);
-        this.setState({
-          option: data
-        });
-      }
-      this.setState({ chartLoading: false });
-    })
-    .catch(err => {
-      console.log(err);
-      this.setState({ chartLoading: false });
-    });
-  }
+      .then(res => {
+        if (res.data.error === 0) {
+          const data = res.data.data;
+          console.log(data);
+          this.setState({
+            option: data
+          });
+        }
+        this.setState({ chartLoading: false });
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({ chartLoading: false });
+      });
+  };
 
   render() {
     return (
-      <div style={{
-        width: '100%',
-        height: 'calc(100vh - 130px)'
-      }}>
+      <div
+        style={{
+          width: '100%',
+          height: 'calc(100vh - 160px)'
+        }}
+      >
         <Button onClick={() => this.getDmLevelData()}>刷新</Button>
         <ReactEcharts
           showLoading={this.state.chartLoading}
           option={this.state.option}
           style={{
             width: '100%',
-            height: 'calc(100vh - 130px)'
+            height: 'calc(100vh - 160px)'
           }}
         />
       </div>
-    )
+    );
   }
 }

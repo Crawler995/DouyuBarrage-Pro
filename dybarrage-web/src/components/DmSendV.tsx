@@ -69,8 +69,8 @@ export default class DmSendV extends Component<{}, IState> {
 
     // default settings
     this.highlightCaptureSettings = {
-      thresold: 8,
-      throttleTime: 5
+      thresold: 60,
+      throttleTime: 10
     };
 
     this.tempSettings = { ...this.highlightCaptureSettings };
@@ -137,16 +137,17 @@ export default class DmSendV extends Component<{}, IState> {
     return (
       <div>
         <Card>
-          <div style={{
-            width: '100%',
-            height: '50vh'
-          }}>
+          <div
+            style={{
+              width: '100%',
+              height: '50vh'
+            }}
+          >
             <ReactEcharts
               option={this.state.chartOption}
               style={{ width: '100%', height: '100%' }}
             />
           </div>
-
         </Card>
         <Card
           style={{
@@ -158,6 +159,7 @@ export default class DmSendV extends Component<{}, IState> {
             onSubmit={e => {
               e.preventDefault();
               this.highlightCaptureSettings = { ...this.tempSettings };
+              message.success('修改设置成功！');
             }}
           >
             <Row gutter={16}>

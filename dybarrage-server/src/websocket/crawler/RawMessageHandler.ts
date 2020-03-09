@@ -44,9 +44,9 @@ export default class RawMessageHandler {
         dm_content: msgObj.txt,
         badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
         badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
-      }
+      };
     });
-  }
+  };
 
   private static getMsgsObj = (buf: Buffer): Array<any> => {
     const decodeMsgs = RawMessageHandler.decode(buf);
@@ -65,11 +65,10 @@ export default class RawMessageHandler {
   };
 
   private static isValidate = (obj: any) => {
-    return (obj.cid && obj.cid !== '') &&
-      (obj.ic) &&
-      !(isNaN(parseInt(obj.level))) &&
-      !(isNaN(parseInt(obj.bl)));
-  }
+    return (
+      obj.cid && obj.cid !== '' && obj.ic && !isNaN(parseInt(obj.level)) && !isNaN(parseInt(obj.bl))
+    );
+  };
 
   // Douyu protocol packet -> barrage info string array
   // a packet may contain several barrage info
@@ -83,11 +82,11 @@ export default class RawMessageHandler {
 
     try {
       while (pos < buf.length) {
-        if(pos > buf.length) {
+        if (pos > buf.length) {
           throw new Error('pos > buf.length');
         }
         const contentLen = buf.slice(pos, pos + 4).readInt32LE(0);
-        if(contentLen < 0) {
+        if (contentLen < 0) {
           throw new Error('contentLen < 0');
         }
         const content = buf.slice(pos + 12, pos + 3 + contentLen).toString();
