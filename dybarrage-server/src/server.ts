@@ -42,6 +42,7 @@ export default class Server {
       '/api/room/:roomId/highlightrec/dmdownload',
       HttpDataGet.getBarrageByHighlightRecord
     );
+    router.get('/api/room/:roomId/dmlevel', HttpDataGet.getDmLevelData);
     router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
   }
 

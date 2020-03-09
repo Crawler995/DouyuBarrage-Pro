@@ -33,8 +33,8 @@ export default class RawMessageHandler {
   };
 
   public static getBarragesInfo = (buf: Buffer): Array<BarrageInfo> => {
-    return RawMessageHandler.getMsgsObj(buf).map(msgObj => (
-      {
+    return RawMessageHandler.getMsgsObj(buf).map(msgObj => {
+      return {
         id: msgObj.cid,
         time: getNowString(),
         room_id: msgObj.rid,
@@ -45,7 +45,7 @@ export default class RawMessageHandler {
         badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
         badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
       }
-    ));
+    });
   }
 
   private static getMsgsObj = (buf: Buffer): Array<any> => {
@@ -56,7 +56,7 @@ export default class RawMessageHandler {
       const obj = RawMessageHandler.parseDecodeMsg(decodeMsg);
       // only need the barrage info
       // ignore other info (gift info...)
-      if (obj.type === 'chatmsg') {
+      if (obj.type === 'chatmsg' && RawMessageHandler.isValidate(obj)) {
         res.push(obj);
       }
     });
@@ -64,12 +64,19 @@ export default class RawMessageHandler {
     return res;
   };
 
+  private static isValidate = (obj: any) => {
+    return (obj.cid && obj.cid !== '') &&
+      (obj.ic) &&
+      !(isNaN(parseInt(obj.level))) &&
+      !(isNaN(parseInt(obj.bl)));
+  }
+
   // Douyu protocol packet -> barrage info string array
   // a packet may contain several barrage info
 
   // if the barrages send velocity is too high (maybe > 150)
-  // when readInt32LE() it will raise ERR_OUT_OF_BOUNEDS error
-  // I don't know why, so try...catch it...
+  // the buffer from Douyu server may be incorrect
+  // so try...catch... it
   private static decode = (buf: Buffer): Array<string> => {
     let pos = 0;
     let msg: Array<string> = [];
@@ -91,11 +98,6 @@ export default class RawMessageHandler {
       return msg;
     } catch (error) {
       RawMessageHandler.logger.error('decode error: ' + error);
-      RawMessageHandler.logger.error('buffer: ');
-      RawMessageHandler.logger.error(buf);
-      RawMessageHandler.logger.error('pos: ' + pos);
-      RawMessageHandler.logger.error('cur msg in arr: ');
-      msg.forEach(item => RawMessageHandler.logger.error(item));
       return [];
     }
   };

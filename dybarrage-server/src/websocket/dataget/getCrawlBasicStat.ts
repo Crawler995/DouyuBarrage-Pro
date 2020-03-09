@@ -27,7 +27,11 @@ export const getPastTotalCrawlTime = async (roomId: string) => {
     where: {
       room_id: roomId
     }
-  }))?.get('crawl_total_time') as number;
+  }))?.get('crawl_total_time');
+
+  if(fakeTotalTime === null) {
+    return 0;
+  }
 
   let fakeTotalTimeStr = fakeTotalTime + '';
   if(fakeTotalTimeStr.length < 6) {

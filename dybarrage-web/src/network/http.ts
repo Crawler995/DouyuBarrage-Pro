@@ -78,3 +78,7 @@ export const downloadBarragesByHighlightRecord = (
 export const getWordFrequency = () => {
   return axiosIns.get(`/room/${getRoomId()}/wordcloud`);
 };
+
+export const getDmLevelData = () => {
+  return axiosIns.get(`/room/${getRoomId()}/dmlevel`);
+};

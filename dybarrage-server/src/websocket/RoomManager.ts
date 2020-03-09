@@ -5,12 +5,9 @@ import * as moment from 'moment';
 import DmCrawler from './crawler/DmCrawler';
 import singleSendMsgTypes from './msgtype/singleSendMsgTypes';
 import log4js from '../logger';
-// import getDmSendVData from './dataget/getDmSendVData';
-// import getDmLevelData from './dataget/getDmLevelData';e
 import getCurBarrages from './dataget/getCurBarrages';
 import { DATA_SEND_INTERVAL } from '../config';
 import HighlightRecord from '../model/HighlightRecord';
-import { getNowString } from '../util';
 import { getPastTotalCrawlTime, getPastTotalCrawlDmNum, getCrawlBasicStat } from './dataget/getCrawlBasicStat';
 import { getKeywordTotalNum, getKeywordThisNum, getKeywordStat } from './dataget/getKeywordStat';
 import { getDmSendVData } from './dataget/getDmSendVData';
@@ -130,9 +127,6 @@ class RoomManager {
     // for client init UI
     this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
     this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
-    // this.singleEmitClient(socket, 'dmsendv_data', getDmSendVData.getStyle());
-    // this.singleEmitClient(socket, 'dmlevel_data', getDmLevelData.getStyle());
-    // this.singleEmitClient(socket, 'dmlevel_data', await getDmLevelData.getSeries(util));
 
     this.logger.info('add room ' + roomId);
   };
@@ -173,7 +167,6 @@ class RoomManager {
     this.startPeriodlyEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat);
     this.startPeriodlyEmitClient(socket, 'keyword_stat', getKeywordStat);
     this.startPeriodlyEmitClient(socket, 'dmsendv_data', getDmSendVData);
-    // this.startPeriodlyEmitClient(socket, 'dmlevel_data', getDmLevelData.getSeries);
   };
 
   public stopRoomCrawlProcess = async (socket: Socket) => {
@@ -269,6 +262,7 @@ class RoomManager {
     const flag = res[0].flag;
     clearInterval(flag);
     util.intervalFlags = util.intervalFlags.filter(item => item.msgType !== 'cur_dm');
+    util.lastBarrages.length = 0;
     this.logger.info('stop send barrages to room ' + util.roomId);
   };
 

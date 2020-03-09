@@ -59,7 +59,10 @@ class DmCrawler {
       const buf: Buffer = ev.data as Buffer;
       // convert Buffer to parsed and readable msg obj
       const barragesInfo = RawMessageHandler.getBarragesInfo(buf);
-      Barrage.bulkCreate(barragesInfo);
+      Barrage.bulkCreate(barragesInfo)
+      .then().catch(err => {
+        this.logger.error('insert barrages error: ' + err);
+      });
 
       roomUtil.crawlBasicStat.thisCrawlDmNum += barragesInfo.length;
       // keyword count

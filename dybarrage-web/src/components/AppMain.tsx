@@ -11,6 +11,7 @@ import DmSendV from './DmSendV';
 import BarrageWall from './BarrageWall';
 import HighlightRecord from './HighlightRecord';
 import BarrageWordCloud from './BarrageWordCloud';
+import DmLevel from './DmLevel';
 const { Content, Sider } = Layout;
 
 const noUnmountedWhenRouteChangesRoute = (path: string, component: JSX.Element) => {
@@ -60,16 +61,7 @@ const AppMain: React.SFC = () => {
         {noUnmountedWhenRouteChangesRoute('/highlightrec', <HighlightRecord />)}
 
         {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
-        {/* {noUnmountedWhenRouteChangesRoute(
-          '/dmlevel',
-          <WSChart
-            dataEventId="dmlevel_data"
-            style={{
-              width: '100%',
-              height: 'calc(100vh - 140px)'
-            }}
-          />
-        )} */}
+        {noUnmountedWhenRouteChangesRoute('/dmlevel', <DmLevel />)}
         {noUnmountedWhenRouteChangesRoute('/dmcloud', <BarrageWordCloud />)}
       </Content>
     </Layout>
