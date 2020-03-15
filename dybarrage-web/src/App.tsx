@@ -2,12 +2,13 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import './App.css';
 
-import { Layout, Icon, Result, Input, message } from 'antd';
+import { Layout, Icon, message } from 'antd';
 
 import AppMain from './components/AppMain';
 import color from './uiconfig/color';
 import getRoomId from './util/getRoomId';
 import getWebSocketClient from './network/websocket/WebSocketClient';
+import IndexPage from './components/IndexPage';
 
 const { Header, Content } = Layout;
 
@@ -28,33 +29,7 @@ class App extends React.Component {
 
   render() {
     if (this.roomId === '') {
-      return (
-        <div
-          style={{
-            boxSizing: 'border-box',
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            paddingTop: '10vh'
-          }}
-        >
-          <Result
-            icon={<Icon type="plus-circle" theme="twoTone" twoToneColor={color.primary} />}
-            title="指定一个房间吧！"
-            subTitle="在下方输入房间号后回车确认，进入管理中心"
-            extra={
-              <Input.Search
-                placeholder="房间号"
-                enterButton
-                style={{ width: '300px' }}
-                onSearch={value =>
-                  (window.location.href = `http://localhost:3000/basic?roomid=${value}`)
-                }
-              />
-            }
-          />
-        </div>
-      );
+      return <IndexPage />;
     }
     return (
       <Layout>

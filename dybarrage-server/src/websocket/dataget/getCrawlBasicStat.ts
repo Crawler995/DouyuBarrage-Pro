@@ -4,13 +4,14 @@ import { Op, Sequelize } from 'sequelize';
 import CrawlRecord from '../../model/CrawlRecord';
 
 export const getPastTotalCrawlDmNum = async (roomId: string) => {
-  return await (
-    await Barrage.findAndCountAll({
+  return ((await (
+    await Barrage.findOne({
+      attributes: [[Sequelize.fn('count', Sequelize.col('id')), 'barrages_num']],
       where: {
         room_id: roomId
       }
     })
-  ).count;
+  )?.get('barrages_num')) ?? 0) as number;
 };
 
 export const getPastTotalCrawlTime = async (roomId: string) => {

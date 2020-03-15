@@ -3,6 +3,7 @@ import { Card, Form, Switch, Row, Col, Button, message, InputNumber } from 'antd
 import getWebSocketClient from '../network/websocket/WebSocketClient';
 import color from '../uiconfig/color';
 import ReactEcharts, { ObjectMap } from 'echarts-for-react';
+import { graphic } from 'echarts';
 
 interface IState {
   isOpenHighlightCaptured: boolean;
@@ -61,6 +62,18 @@ export default class DmSendV extends Component<{}, IState> {
           type: 'line',
           lineStyle: {
             color: color.primary
+          },
+          areaStyle: {
+            color: new graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: 'rgba(255, 169, 64, 0.4)'
+              },
+              {
+                offset: 1,
+                color: 'rgba(255, 169, 64, 0)'
+              }
+            ])
           },
           symbol: 'none'
         }

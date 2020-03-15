@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Transaction } from 'sequelize';
 import { dbconfig } from '../config';
 import log4js from '../logger';
 
@@ -6,7 +6,7 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
   host: dbconfig.host,
   dialect: 'mysql',
   pool: {
-    max: 20,
+    max: 200,
     min: 0,
     idle: 10000,
     acquire: 30000
@@ -18,7 +18,8 @@ const sequelize = new Sequelize(dbconfig.db, dbconfig.username, dbconfig.passwor
   define: {
     charset: 'utf8mb4'
   },
-  timezone: dbconfig.timezone
+  timezone: dbconfig.timezone,
+  isolationLevel: Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED
 });
 
 const logger = log4js.getLogger('db');

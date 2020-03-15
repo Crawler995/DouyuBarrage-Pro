@@ -1,9 +1,8 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
-import CrawlRecord from '../../model/CrawlRecord';
-import Barrage from '../../model/Barrage';
+import { CrawlRecord } from '../../model';
 import { Op } from 'sequelize';
-import { Parser } from 'json2csv';
+import getBarrage from './getBarrage';
 
 export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>) => {
   const { crawlRecordIds, columns } = ctx.request.body;
@@ -35,23 +34,7 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
     };
   });
 
-  const barrages = await Barrage.findAll({
-    where: {
-      room_id: roomId,
-      time: {
-        [Op.or]: times
-      }
-    }
-  });
-
-  const barragesJSON = barrages.map(item => item.toJSON());
-
-  const csv = new Parser({
-    fields: columns
-  }).parse(barragesJSON);
-
-  const utf8BOM = Buffer.from('\xEF\xBB\xBF', 'binary');
-  const buffer = Buffer.concat([utf8BOM, Buffer.from(csv)]);
+  const buffer = await getBarrage(roomId, columns, times);
 
   ctx.set('Content-disposition', 'attachment; filename=barrages.csv');
   ctx.set('Content-type', 'text/csv; charset=utf-8');

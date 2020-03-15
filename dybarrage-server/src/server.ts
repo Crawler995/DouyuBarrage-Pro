@@ -35,6 +35,7 @@ export default class Server {
 
   private addRouter = (router: Router) => {
     router.get('/api/room/:roomId/dyinfo', HttpDataGet.getRoomDyInfo);
+    router.get('/api/top', HttpDataGet.getTopData);
     router.get('/api/room/:roomId/crawlrec', HttpDataGet.getCrawlRecord);
     router.post('/api/room/:roomId/crawlrec/dmdownload', HttpDataGet.getBarrageByCrawlRecord);
     router.get('/api/room/:roomId/highlightrec', HttpDataGet.getHighlightRecord);
@@ -42,7 +43,6 @@ export default class Server {
       '/api/room/:roomId/highlightrec/dmdownload',
       HttpDataGet.getBarrageByHighlightRecord
     );
-    router.get('/api/room/:roomId/dmlevel', HttpDataGet.getDmLevelData);
     router.get('/api/room/:roomId/fans', HttpDataGet.getFans);
     router.get('/api/room/:roomId/wordcloud', HttpDataGet.getWordFrequency);
   };

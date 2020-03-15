@@ -11,7 +11,6 @@ import DmSendV from './DmSendV';
 import BarrageWall from './BarrageWall';
 import HighlightRecord from './HighlightRecord';
 import BarrageWordCloud from './BarrageWordCloud';
-import DmLevel from './DmLevel';
 import FansChart from './FansChart';
 const { Content, Sider } = Layout;
 
@@ -62,7 +61,6 @@ const AppMain: React.SFC = () => {
         {noUnmountedWhenRouteChangesRoute('/highlightrec', <HighlightRecord />)}
 
         {noUnmountedWhenRouteChangesRoute('/dmsendv', <DmSendV />)}
-        {noUnmountedWhenRouteChangesRoute('/dmlevel', <DmLevel />)}
         {noUnmountedWhenRouteChangesRoute('/dmcloud', <BarrageWordCloud />)}
         {noUnmountedWhenRouteChangesRoute('/fanstat', <FansChart />)}
       </Content>

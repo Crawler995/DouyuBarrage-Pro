@@ -1,13 +1,12 @@
 import { Socket } from 'socket.io';
 import periodlySendMsgType from './msgtype/periodlySendMsgType';
-import CrawlRecord from '../model/CrawlRecord';
+import { CrawlRecord, HighlightRecord } from '../model';
 import * as moment from 'moment';
 import DmCrawler from './crawler/DmCrawler';
 import singleSendMsgTypes from './msgtype/singleSendMsgTypes';
 import log4js from '../logger';
 import getCurBarrages from './dataget/getCurBarrages';
 import { DATA_SEND_INTERVAL } from '../config';
-import HighlightRecord from '../model/HighlightRecord';
 import {
   getPastTotalCrawlTime,
   getPastTotalCrawlDmNum,
@@ -135,8 +134,8 @@ class RoomManager {
 
     this.singleEmitClient(socket, 'add_room_success');
     // for client init UI
-    this.singleEmitClient(socket, 'crawl_basic_stat', await getCrawlBasicStat(util));
-    this.singleEmitClient(socket, 'keyword_stat', await getKeywordStat(util));
+    this.singleEmitClient(socket, 'crawl_basic_stat', getCrawlBasicStat(util));
+    this.singleEmitClient(socket, 'keyword_stat', getKeywordStat(util));
 
     this.logger.info('add room ' + roomId);
   };

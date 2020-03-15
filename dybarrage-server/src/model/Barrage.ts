@@ -1,7 +1,8 @@
 import db from './db';
 import * as moment from 'moment';
-import { Sequelize, DATE, STRING, NOW, INTEGER, Model, NUMBER } from 'sequelize';
+import { DATE, STRING, Model } from 'sequelize';
 import log4js from '../logger';
+import User from './User';
 
 // table
 class Barrage extends Model {}
@@ -23,29 +24,13 @@ Barrage.init(
       type: STRING(10),
       allowNull: false
     },
-    sender_name: {
-      type: STRING(60),
-      allowNull: false
-    },
-    sender_level: {
-      type: INTEGER,
-      allowNull: false
-    },
-    sender_avatar_url: {
-      type: STRING(100),
+    user_id: {
+      type: STRING(12),
       allowNull: false
     },
     dm_content: {
       type: STRING(200),
       allowNull: false
-    },
-    badge_name: {
-      type: STRING(20),
-      allowNull: true
-    },
-    badge_level: {
-      type: INTEGER,
-      allowNull: true
     }
   },
   {

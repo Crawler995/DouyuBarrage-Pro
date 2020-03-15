@@ -1,6 +1,6 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
-import CrawlRecord from '../../model/CrawlRecord';
+import { CrawlRecord } from '../../model';
 import { Op } from 'sequelize';
 
 export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>) => {

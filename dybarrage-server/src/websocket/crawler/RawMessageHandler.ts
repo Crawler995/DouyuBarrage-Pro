@@ -38,12 +38,13 @@ export default class RawMessageHandler {
         id: msgObj.cid,
         time: getNowString(),
         room_id: msgObj.rid,
+        user_id: msgObj.uid,
         sender_name: msgObj.nn,
         sender_level: parseInt(msgObj.level),
         sender_avatar_url: msgObj.ic,
         dm_content: msgObj.txt,
-        badge_name: msgObj.bnn === '' ? null : msgObj.bnn,
-        badge_level: msgObj.bl === '0' ? null : parseInt(msgObj.bl)
+        badge_name: msgObj.bnn,
+        badge_level: parseInt(msgObj.bl)
       };
     });
   };
@@ -66,7 +67,12 @@ export default class RawMessageHandler {
 
   private static isValidate = (obj: any) => {
     return (
-      obj.cid && obj.cid !== '' && obj.ic && !isNaN(parseInt(obj.level)) && !isNaN(parseInt(obj.bl))
+      obj.cid &&
+      obj.cid !== '' &&
+      obj.ic &&
+      obj.ic !== '' &&
+      !isNaN(parseInt(obj.level)) &&
+      !isNaN(parseInt(obj.bl))
     );
   };
 

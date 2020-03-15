@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Button } from 'antd';
 import ReactEcharts, { ObjectMap } from 'echarts-for-react';
-import getWebSocketClient from '../network/websocket/WebSocketClient';
 
 interface IState {
   option: ObjectMap;
@@ -21,10 +20,6 @@ export default class ManuallyRefreshChart extends Component<IProps, IState> {
       option: props.initOption,
       chartLoading: false
     };
-  }
-
-  componentDidMount() {
-    getWebSocketClient().addConnectSuccessHook(this.getData);
   }
 
   getData = () => {

@@ -4,8 +4,8 @@ import getRoomDyInfo from './getRoomDyInfo';
 import getHighlightRecord from './getHighlightRecord';
 import getBarrageByHighlightRecord from './getBarrageByHighlightRecord';
 import getWordFrequency from './getWordFrequency';
-import getDmLevelData from './getDmLevelData';
 import getFans from './getFans';
+import getTopData from './getTopData';
 
 export {
   getCrawlRecord,
@@ -14,6 +14,6 @@ export {
   getHighlightRecord,
   getBarrageByHighlightRecord,
   getWordFrequency,
-  getDmLevelData,
-  getFans
+  getFans,
+  getTopData
 };

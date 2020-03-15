@@ -3,14 +3,12 @@ import echarts from 'echarts';
 import 'echarts-wordcloud';
 import { Button } from 'antd';
 import { getWordFrequency } from '../network/http';
-import getWebSocketClient from '../network/websocket/WebSocketClient';
 
 export default class BarrageWordCloud extends Component {
   private chartIns: echarts.ECharts | null = null;
 
   componentDidMount() {
     this.chartIns = echarts.init(document.getElementById('barrage-word-cloud') as HTMLDivElement);
-    getWebSocketClient().addConnectSuccessHook(() => this.getWordFrequency());
   }
 
   getWordFrequency = () => {

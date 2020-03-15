@@ -35,7 +35,6 @@ const menu: IMenu = {
       iconType: 'area-chart',
       items: [
         { text: '实时弹幕发送速度', path: 'dmsendv' },
-        { text: '用户等级与发送弹幕数', path: 'dmlevel' },
         { text: '铁粉统计', path: 'fanstat' },
         { text: '弹幕词云', path: 'dmcloud' }
       ]

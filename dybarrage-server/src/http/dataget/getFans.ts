@@ -1,38 +1,40 @@
-import Barrage from '../../model/Barrage';
-import { Sequelize } from 'sequelize';
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
+import { UserBarrageNum, User } from '../../model';
+import { Op } from 'sequelize';
 
 const getFans = async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>) => {
   const roomId = ctx.params.roomId;
   const res = await getFansDataFromDB(roomId);
-  const sortedRes = res.sort(
-    (a: any, b: any) => b.get('send_barrages_num') - a.get('send_barrages_num')
-  );
 
   ctx.body = {
     error: 0,
     data: {
       xAxis: {
-        data: sortedRes.map((item: any) => item.get('sender_name'))
+        data: res.map((item: any) => item.get('user').get('sender_name'))
       },
       series: {
-        data: sortedRes.map((item: any) => item.get('send_barrages_num'))
+        data: res.map((item: any) => item.get('barrage_num'))
       }
     }
   };
 };
 
+// todo
 const getFansDataFromDB = async (roomId: string) => {
-  return await Barrage.findAll({
-    attributes: [
-      'sender_name',
-      [Sequelize.fn('COUNT', Sequelize.col('sender_name')), 'send_barrages_num']
+  return await UserBarrageNum.findAll({
+    include: [
+      {
+        model: User,
+        required: true,
+        attributes: [['name', 'sender_name']]
+      }
     ],
+    attributes: ['barrage_num'],
     where: {
       room_id: roomId
     },
-    group: 'sender_name',
+    order: [['barrage_num', 'DESC']],
     limit: 40
   });
 };

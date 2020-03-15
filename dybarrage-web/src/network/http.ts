@@ -9,6 +9,10 @@ export const getRoomDyInfo = () => {
   return axiosIns.get(`/room/${getRoomId()}/dyinfo`);
 };
 
+export const getTop3 = () => {
+  return axiosIns.get(`/top`);
+};
+
 export const getCrawlRecord = (
   startTime?: string,
   stopTime?: string,

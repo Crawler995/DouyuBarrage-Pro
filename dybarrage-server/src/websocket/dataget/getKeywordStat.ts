@@ -1,6 +1,6 @@
 import { RoomUtil } from '../RoomManager';
 import Barrage from '../../model/Barrage';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 
 interface IMatchRes {
   key: string;
@@ -10,8 +10,9 @@ interface IMatchRes {
 }
 
 export const getKeywordTotalNum = async (roomId: string, keyword: string) => {
-  return await (
-    await Barrage.findAndCountAll({
+  return ((
+    await Barrage.findOne({
+      attributes: [[Sequelize.fn('count', Sequelize.col('id')), 'barrages_num']],
       where: {
         room_id: roomId,
         dm_content: {
@@ -19,7 +20,7 @@ export const getKeywordTotalNum = async (roomId: string, keyword: string) => {
         }
       }
     })
-  ).count;
+  )?.get('barrages_num') ?? 0) as number;
 };
 
 export const getKeywordThisNum = async (
@@ -31,8 +32,9 @@ export const getKeywordThisNum = async (
     return 0;
   }
 
-  return await (
-    await Barrage.findAndCountAll({
+  return ((
+    await Barrage.findOne({
+      attributes: [[Sequelize.fn('count', Sequelize.col('id')), 'barrages_num']],
       where: {
         room_id: roomId,
         dm_content: {
@@ -43,7 +45,7 @@ export const getKeywordThisNum = async (
         }
       }
     })
-  ).count;
+  )?.get('barrages_num') ?? 0) as number;
 };
 
 export const getKeywordStat = (util: RoomUtil) => {

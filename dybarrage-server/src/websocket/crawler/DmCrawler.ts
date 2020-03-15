@@ -4,7 +4,7 @@ import Barrage from '../../model/Barrage';
 import * as moment from 'moment';
 import RoomManager, { RoomUtil } from '../RoomManager';
 import log4js from '../../logger';
-import { DATA_SEND_INTERVAL } from '../../config';
+import DBWriter from './DBWriter';
 
 // Douyu Barrage Crawler
 // detail
@@ -49,7 +49,7 @@ class DmCrawler {
       });
     };
 
-    crawlerWs.onmessage = (ev: WebSocket.MessageEvent) => {
+    crawlerWs.onmessage = async (ev: WebSocket.MessageEvent) => {
       const util = this.crawlerWSUtilMap.get(roomUtil);
       // receive message after room removed
       if (util === undefined) {
@@ -59,14 +59,19 @@ class DmCrawler {
       const buf: Buffer = ev.data as Buffer;
       // convert Buffer to parsed and readable msg obj
       const barragesInfo = RawMessageHandler.getBarragesInfo(buf);
-      Barrage.bulkCreate(barragesInfo)
-        .then()
-        .catch(err => {
-          this.logger.error('insert barrages error: ' + err);
-        });
 
+      // use new barrages info to update something
+
+      // insert users
+      await DBWriter.addUsers(barragesInfo);
+      // insert barrages
+      await DBWriter.addBarrages(barragesInfo);
+      // update / insert users barrage num
+      DBWriter.updateUserBarrageNum(barragesInfo);
+
+      // update barrages num
       roomUtil.crawlBasicStat.thisCrawlDmNum += barragesInfo.length;
-      // keyword count
+      // update keyword count
       roomUtil.countKeywords.forEach((value, keyword) => {
         barragesInfo.forEach(barrage => {
           if (barrage.dm_content.includes(keyword)) {
@@ -77,7 +82,7 @@ class DmCrawler {
           }
         });
       });
-      // last barrages
+      // update last barrages
       if (roomUtil.isRequestedSendingBarrages) {
         roomUtil.lastBarrages.push(...barragesInfo);
       }
