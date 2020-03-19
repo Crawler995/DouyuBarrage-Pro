@@ -83,6 +83,8 @@ class DBWriter {
             }
           );
         }
+        // tell bluebird the chain is ending
+        return null;
       }).catch(err => DBWriter.logger.error('update user barrage num error: ' + err));
     }
   };
