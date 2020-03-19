@@ -22,6 +22,7 @@ export default class BarrageWordCloud extends Component {
               {
                 type: 'wordCloud',
                 shape: 'circle',
+                sizeRange: [30, 80],
                 textStyle: {
                   normal: {
                     fontFamily: 'sans-serif',
