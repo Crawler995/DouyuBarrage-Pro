@@ -254,6 +254,7 @@ class RoomManager {
     }
 
     util.isRequestedSendingBarrages = true;
+    util.lastBarrages.length = 0;
     this.startPeriodlyEmitClient(socket, 'cur_dm', getCurBarrages);
     this.logger.info('start send barrages to room ' + this.roomUtilMap.get(socket)?.roomId);
   };
