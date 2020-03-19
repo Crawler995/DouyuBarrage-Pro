@@ -12,7 +12,12 @@ export default async (ctx: Koa.ParameterizedContext<any, Router.IRouterParamCont
     new Promise((resolve: (value: any) => void) => {
       // new process
       // parse word frequency takes much CPU time
-      const worker = fork(path.resolve('./src/http/dataget/_getWordFrequency.ts'));
+      
+      const forkPath = process.env.NODE_ENV === 'development' ? 
+        path.resolve('./src/http/dataget/_getWordFrequency.ts') :
+        path.resolve('./dist/http/dataget/_getWordFrequency.js');
+      
+      const worker = fork(forkPath);
       worker.on('message', (m: any) => {
         if (typeof m === 'object' && m.type === 'word_frequency') {
           worker.kill();

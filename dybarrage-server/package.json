@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/entry.js",
   "scripts": {
-    "start": "tsc && node dist/entry.js",
-    "watch-server": "cross-env nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/entry.ts",
+    "start": "tsc && cross-env NODE_ENV=production node dist/entry.js",
+    "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/entry.ts",
     "lint": "eslint ./src/**",
     "format": "prettier --config .prettierrc --write ./src/**/*.ts",
     "precommit": "npm run lint && npm run format"
