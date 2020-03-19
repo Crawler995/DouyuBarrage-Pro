@@ -1,12 +1,38 @@
 # DouyuBarrage-Pro
 
-比[第一个版本DouyuBarrage]( https://github.com/Crawler995/DouyuBarrage )**功能更加强大智能、界面更加易用、可视化更加科学**、代码更加整洁！（当然第一个版本其实也不错的，可以先用着）
+比[第一个版本DouyuBarrage]( https://github.com/Crawler995/DouyuBarrage )**功能更加强大智能、界面更加易用、可视化更加科学**！（第一个版本其实是用来试水的，为了验证这个想法的可行性。没想到的是收到了那么一点点的star，这激励我要把这个项目做好、做完整，不能辜负大家的期望。这个版本有两位知乎朋友在认真的使用、反馈问题，非常感谢！）
 
 目前已基本可以使用，不排除还有莫名奇妙的问题，欢迎反馈。
 
-下图展示了"**弹幕墙、弹幕实时发送速度可视化、高光时刻自动捕获**"等功能（弹幕可关闭或者调整透明度，嫌弹幕扰乱眼睛的不用担心）。2020年3月1日下午16点10分，著名主播大司马剑姬被石头人单杀，完成究极下饭操作，直播间瞬间爆炸，于是此刻弹幕发送速度曲线陡增、弹幕墙突增大量弹幕，管理中心自动捕获到了此次高光时刻。
+**起飞~~~**
 
-[![2020-03-01-161106.jpg](https://i.postimg.cc/vZ4SNCtn/2020-03-01-161106.jpg)](https://postimg.cc/bZjTGCMY)
+[![2020-03-19-140649.jpg](https://i.postimg.cc/vm451RbX/2020-03-19-140649.jpg)](https://postimg.cc/CZVRtQZf)
+
+[![2020-03-19-135721.jpg](https://i.postimg.cc/zf4KKdfN/2020-03-19-135721.jpg)](https://postimg.cc/TyqKXJmN)
+
+[![2020-03-19-140456.jpg](https://i.postimg.cc/zDKSS1Wc/2020-03-19-140456.jpg)](https://postimg.cc/K4cMxw0P)
+
+[![2020-03-19-140521.jpg](https://i.postimg.cc/xTQG6F3T/2020-03-19-140521.jpg)](https://postimg.cc/kDjt4sHk)
+
+[![2020-03-19-141017.jpg](https://i.postimg.cc/Jz4NLDFf/2020-03-19-141017.jpg)](https://postimg.cc/pp4hQTRC)
+
+[![2020-03-19-140618.jpg](https://i.postimg.cc/KjPPZnx2/2020-03-19-140618.jpg)](https://postimg.cc/9wfRbwD8)
+
+[![2020-03-19-140726.jpg](https://i.postimg.cc/Fsxy8gTb/2020-03-19-140726.jpg)](https://postimg.cc/YhhLmgKj)
+
+[![2020-03-19-140827.jpg](https://i.postimg.cc/MpPyKZ2v/2020-03-19-140827.jpg)](https://postimg.cc/NKXydc0c)
+
+## 功能
+
+1. 开始/暂停抓取弹幕
+2. 开启/关闭弹幕墙，支持弹幕飘过速度、弹幕字体大小、透明度等设置
+3. 抓取弹幕记录查询、下载指定抓取记录所抓取的弹幕、下载全部弹幕
+4. 自定义关键词统计
+5. 铁粉（发送弹幕最多）统计
+6. 高光时刻实时自动捕获、记录、查询、下载高光时刻弹幕
+7. 弹幕发送速度实时可视化
+8. 高频弹幕词云
+9. ……待补充
 
 ## 运行
 
@@ -14,7 +40,8 @@
 
 1. 确认已安装`node.js`、`mysql`
 2. `mysql`中创建数据库`create database dybarrage_pro;`
-3. `mysql`中增加最大连接数`set GLOBAL max_connections=200;`（若在运行过程中出现`too many connections`错误，则继续增大最大连接数，这与你所抓取的直播间数量、流量有关）
+3. `mysql`中增加最大连接数`set GLOBAL max_connections=200;`（若在使用过程中出现`too many connections`错误，则继续增大最大连接数，这与你所抓取的直播间数量、流量有关）
+4. 打开`dybarrage-server/src`中的`config.ts`文件，修改数据库连接用户名、密码
 
 ### 安装依赖
 
@@ -35,18 +62,6 @@ npm start
 
 # 若出现报错，应该是全局依赖没有装上，比如react-app-rewired、cross-env等，使用npm install <包名> -g安装即可，如npm install react-app-rewired -g
 ```
-
-## 功能
-
-1. 开始/暂停抓取弹幕
-2. 开启/关闭弹幕墙，支持弹幕飘过速度、弹幕字体大小、透明度等设置
-3. 抓取弹幕记录查询、下载指定抓取记录所抓取的弹幕、下载全部弹幕
-4. 自定义关键词统计
-5. 铁粉（发送弹幕最多）统计
-6. 高光时刻实时自动捕获、记录、查询、下载高光时刻弹幕
-7. 弹幕发送速度实时可视化
-10. 高频弹幕词云
-11. ……待补充
 
 
 ## 技术栈
