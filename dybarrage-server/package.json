@@ -20,7 +20,7 @@
     "@types/sequelize": "^4.28.8",
     "@types/socket.io": "^2.1.4",
     "@types/ws": "^7.2.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "json2csv": "^4.5.4",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
