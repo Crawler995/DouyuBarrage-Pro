@@ -43,7 +43,7 @@
     "eslint": "^6.8.0",
     "eslint-config-alloy": "^3.6.0",
     "husky": "^4.2.3",
-    "log4js": "^6.1.2",
+    "log4js": "^6.4.0",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1"
   }
