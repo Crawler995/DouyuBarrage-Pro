@@ -29,7 +29,7 @@
     "mysql2": "^2.1.0",
     "nodejieba": "^2.4.0",
     "sequelize": "^5.21.5",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.5.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.2",
     "ws": "^7.2.1"
